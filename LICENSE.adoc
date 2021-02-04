@@ -1,0 +1,11 @@
+= LICENSE file for the KhronosGroup/VK-GL-CTS-Tools project
+
+Files in this repository fall under the following license:
+
+  * SPDX license identifier: "`Apache-2.0`"
+  ** Apache License 2.0
+
+Full license text of this license is available at:
+
+  * Apache-2.0: https://opensource.org/licenses/Apache-2.0 or
+    link:LICENSES/Apache-2.0.txt[LICENSES/Apache-2.0.txt]

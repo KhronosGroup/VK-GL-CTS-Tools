@@ -1,0 +1,24 @@
+// Copyright 2020-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+= Contributing
+
+Contributions to the VK-GL-CTS-Tools repository are welcome.
+
+Contributions may be in the form of Issues proposing a change, or Pull
+Requests containing fixes for, or additions to the tools.
+
+Please keep contributions focused on solving a single issue or bug.
+
+== Copyright Notice and License Template
+
+If you are adding a new file, it must be under the Apache 2.0 license, and
+include the SPDX License Identifier following the copyright statement.
+
+== Contributor License Agreement
+
+When you propose a pull request on this repository you must execute the
+Khronos Contributor License Agreement, to confirm you own your work and are
+granting Khronos the necessary permissions to redistribute it under our
+licenses.
