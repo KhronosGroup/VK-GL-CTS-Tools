@@ -34,7 +34,7 @@ def isKCCTSRelease(releaseTagStr):
 	return False
 
 def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
-	releaseTagStr = str(releaseTag, 'utf-8')
+	releaseTagStr = releaseTag
 	if not beginsWith(releaseTagStr, RELEASE_TAG_DICT[api]):
 		report.failure("Release tag %s is not supported by automated verification" % releaseTagStr)
 		return False
@@ -46,7 +46,7 @@ def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
 			break
 
 	if matchFound == True:
-		report.failure("Release tag %s was withdrawn. Submissions against this tag are invalid." % releaseTag)
+		report.failure("Release tag %s was withdrawn. Submissions against this tag are invalid." % releaseTagStr)
 		return False
 
 	matchFound = False
@@ -56,21 +56,21 @@ def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
 			break
 
 	if matchFound == False:
-		report.failure("Release tag %s is not supported by automated verification" % releaseTag)
+		report.failure("Release tag %s is not supported by automated verification" % releaseTagStr)
 		return False
 
 	pushWorkingDir(ctsPath)
 	try:
-		result = git('tag', '-l', releaseTag)
+		result = git('tag', '-l', releaseTagStr).decode('utf-8')
 	except:
 		pass
 	else:
-		if result.strip('\r\n') != releaseTag:
-			report.failure("Failed to find tag %s in VK-GL-CTS" % releaseTag)
+		if result.strip('\r\n') != releaseTagStr:
+			report.failure("Failed to find tag %s in VK-GL-CTS" % releaseTagStr)
 			return False
 	popWorkingDir()
 
-	report.message("Verifying against %s" % releaseTag)
+	report.message("Verifying against %s" % releaseTagStr)
 	return True
 
 def getReleaseLog (report, ctsPath, releaseTagStr):
@@ -78,11 +78,11 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 	report.message("Fetching HEAD commit of %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 	checkoutReleaseTag(report, releaseTagStr)
-	releaseLog[0] = str(git('log', '-1', '--decorate=no', releaseTagStr), 'utf-8')
+	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
 	if isKCCTSRelease(releaseTagStr):
 		kcctsDir = os.path.join(ctsPath, 'external', 'kc-cts', 'src')
 		pushWorkingDir(kcctsDir)
-		releaseLog[1] = str(git('log', '-1', '--decorate=no', releaseTagStr), 'utf-8')
+		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
 		popWorkingDir()
 	popWorkingDir()
 
@@ -96,7 +96,7 @@ def getGitCommitFromLog(package):
 		logPath	= os.path.join(package.basePath, logFile)
 		log		= readFile(logPath)
 		for line in log.splitlines():
-			args = str(line, 'utf-8').split(' ')
+			args = line.decode('utf-8').split(' ')
 			if args[0] == "commit":
 				return args[1]
 	return "invalid"
@@ -115,7 +115,7 @@ def verifyStatement (report, package):
 	anyError		= False
 
 	for line in statement.splitlines():
-		line = str(line, 'utf-8', 'ignore')
+		line = line.decode('utf-8')
 		if beginsWith(line, "CONFORM_VERSION:"):
 			if hasVersion:
 				report.failure("Multiple CONFORM_VERSIONs", package.statement)
@@ -177,7 +177,7 @@ def verifyGitStatus (report, package):
 	if len(package.gitStatus) > 0:
 		for s in package.gitStatus:
 			statusPath	= os.path.join(package.basePath, s)
-			status		= str(readFile(statusPath), 'utf-8')
+			status		= readFile(statusPath).decode('utf-8')
 
 			if status.find("nothing to commit, working directory clean") < 0 and status.find("nothing to commit, working tree clean") < 0:
 				report.failure("Working directory is not clean")
@@ -205,7 +205,7 @@ def verifyGitStatusFiles (report, package, releaseTagStr):
 		report.passed("Verification of git status files PASSED")
 
 def sanitizePackageLog(log, report = None):
-	slog = str(log, 'utf-8', 'ignore')
+	slog = log.decode('utf-8')
 	if report != None and slog != log:
 		report.warning("git log contains non-decodable symbols")
 	slog = slog.replace('\r\n', '\n')
@@ -220,7 +220,7 @@ def isGitLogEmpty (package, releaseLog, gitLog, report = None):
 
 	if report != None:
 		report.message("git log contains:", gitLog)
-		prisitineLog = str(prisitineLog, 'utf-8', 'ignore')
+		prisitineLog = prisitineLog.decode('utf-8')
 		report.fmtmessage(prisitineLog)
 	if log == releaseLog[0]:
 		return True
@@ -309,7 +309,7 @@ def verify (report, verfification):
 	res = verifyReleaseTagAndApi(report, verfification.ctsPath, verfification.api, verfification.releaseTag)
 	if res == False:
 		return
-	releaseTagStr	= str(verfification.releaseTag, 'utf-8')
+	releaseTagStr	= verfification.releaseTag
 	package			= getPackageDescription(report, verfification.packagePath)
 	releaseLog		= getReleaseLog(report, verfification.ctsPath, releaseTagStr)
 	gitSHA			= getGitCommitFromLog(package)

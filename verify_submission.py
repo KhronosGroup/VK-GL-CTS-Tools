@@ -38,7 +38,7 @@ def parseArgs ():
 	parser.add_argument("-d",
 						"--untar-dir",
 						dest="untarDir",
-						default=os.getcwd(),
+						default=tempfile.mkdtemp(),
 						help="Directory to untar the package")
 	parser.add_argument("-v",
 						"--verbose",
