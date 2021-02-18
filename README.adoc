@@ -14,7 +14,7 @@ This script requires Python >= 3.0.
 === 1) Check-Out this project
 
 ```bash
-git clone https://github.com/KhronosGroup/verify-submission-oss
+git clone https://github.com/KhronosGroup/VK-GL-CTS-Tools.git
 ```
 
 === 2) Run
