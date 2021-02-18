@@ -86,7 +86,7 @@ def verifyTestLogs (report, package, mustpass, fractionMustpass, gitSHA):
 		report.passed("Verification of test logs PASSED")
 
 def verify_vk (report, verfification, package, gitSHA):
-	releaseTagStr = str(verfification.releaseTag, 'utf-8')
+	releaseTagStr = verfification.releaseTag
 	success, mustpass, fractionMustpass = getMustpass(report, verfification.api, verfification.ctsPath, releaseTagStr)
 	if success == True:
 		verifyTestLogs(report, package, mustpass, fractionMustpass, gitSHA)

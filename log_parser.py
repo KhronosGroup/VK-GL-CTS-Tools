@@ -27,6 +27,7 @@ import xml.dom.minidom
 class StatusCode:
 	PASS					= 'Pass'
 	FAIL					= 'Fail'
+	WAIVED  				= 'Waiver'
 	QUALITY_WARNING			= 'QualityWarning'
 	COMPATIBILITY_WARNING	= 'CompatibilityWarning'
 	PENDING					= 'Pending'
@@ -40,6 +41,7 @@ class StatusCode:
 	STATUS_CODE_SET			= {
 		PASS,
 		FAIL,
+		WAIVED,
 		QUALITY_WARNING,
 		COMPATIBILITY_WARNING,
 		PENDING,

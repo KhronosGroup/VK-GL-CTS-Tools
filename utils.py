@@ -31,6 +31,7 @@ from log_parser import StatusCode, BatchResultParser
 
 ALLOWED_STATUS_CODES = set([
 		StatusCode.PASS,
+		StatusCode.WAIVED,
 		StatusCode.NOT_SUPPORTED,
 		StatusCode.QUALITY_WARNING,
 		StatusCode.COMPATIBILITY_WARNING,
@@ -81,7 +82,7 @@ def readFile (filename):
 	return data
 
 def untarPackage(report, pkgFile, dst):
-	report.message("Unpacking ...", pkgFile)
+	report.message("Unpacking to %s ..." % str(dst), pkgFile)
 	try:
 		tar = tarfile.open(pkgFile)
 		tar.extractall(dst)
@@ -233,6 +234,8 @@ def validateTestCasePresence(report, mustpass, results):
 			if not result.statusCode in ALLOWED_STATUS_CODES:
 				report.failure(result.name + ": " + result.statusCode)
 				anyError |= True
+			if result.statusCode == StatusCode.WAIVED:
+				report.warning(result.name + ": " + result.statusCode)
 		else:
 			if failNum < 21:
 				report.failure("Missing result for " + str(caseName, 'utf-8'))
