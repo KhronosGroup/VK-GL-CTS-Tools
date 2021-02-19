@@ -61,7 +61,7 @@ def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
 
 	pushWorkingDir(ctsPath)
 	try:
-		result = git('tag', '-l', releaseTagStr).decode('utf-8')
+		result = git('tag', '-l', releaseTagStr)
 	except:
 		pass
 	else:
@@ -78,11 +78,11 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 	report.message("Fetching HEAD commit of %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 	checkoutReleaseTag(report, releaseTagStr)
-	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
+	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr)
 	if isKCCTSRelease(releaseTagStr):
 		kcctsDir = os.path.join(ctsPath, 'external', 'kc-cts', 'src')
 		pushWorkingDir(kcctsDir)
-		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
+		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr)
 		popWorkingDir()
 	popWorkingDir()
 

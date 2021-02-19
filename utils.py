@@ -111,7 +111,7 @@ def git (*args):
 	output = process.communicate()[0]
 	if process.returncode != 0:
 		raise Exception("Failed to execute '%s', got %d" % (str(args), process.returncode))
-	return output
+	return output.decode('utf-8', 'ignore')
 
 def cloneCTS(dest):
 	repos		= ['ssh://gerrit.khronos.org:29418/vk-gl-cts',
