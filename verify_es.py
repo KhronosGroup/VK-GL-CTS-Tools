@@ -70,7 +70,7 @@ def compareConfigs(report, filename, baseConfigs, cmpConfigs):
 	cmpKey = list(cmpConfigs.keys())[0]
 
 	if baseConfigs[baseKey] != cmpConfigs[cmpKey]:
-		report.failure("Confomant configs reported for %s and %s do not match" % (baseKey,cmpKey))
+		report.failure("Conformant configs reported for %s and %s do not match" % (baseKey,cmpKey))
 
 def verifyConfigFile (report, filename, type):
 	caseNames = getConfigCaseName(type)
