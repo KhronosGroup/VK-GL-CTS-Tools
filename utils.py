@@ -222,7 +222,7 @@ def validateTestCasePresence(report, mustpass, results):
 
 	failNum = 0
 	for ndx in range(len(mustpass)):
-		caseName = str(mustpass[ndx], 'utf-8')
+		caseName = mustpass[ndx].decode('utf-8')
 
 		if caseName in caseNameToResultNdx:
 			resultNdx	= caseNameToResultNdx[caseName]
@@ -238,7 +238,7 @@ def validateTestCasePresence(report, mustpass, results):
 				report.warning(result.name + ": " + result.statusCode)
 		else:
 			if failNum < 21:
-				report.failure("Missing result for " + str(caseName, 'utf-8'))
+				report.failure("Missing result for " + caseName.decode('utf-8'))
 				failNum += 1
 			anyError |= True
 
