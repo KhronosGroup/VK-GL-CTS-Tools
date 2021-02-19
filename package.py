@@ -148,7 +148,7 @@ def findReleaseTag(report, packagePath):
 				report.generate(RETURN_CODE_FAIL)
 			else:
 				assert len(line.split()) >= 2
-				conformVersion = line.split()[1].decode('utf-8')
+				conformVersion = line.split()[1].decode('utf-8', 'ignore')
 				hasVersion = True
 
 	if conformVersion != None:
