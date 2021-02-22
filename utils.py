@@ -111,7 +111,7 @@ def git (*args):
 	output = process.communicate()[0]
 	if process.returncode != 0:
 		raise Exception("Failed to execute '%s', got %d" % (str(args), process.returncode))
-	return output
+	return output.decode('utf-8', 'ignore')
 
 def cloneCTS(dest):
 	repos		= ['ssh://gerrit.khronos.org:29418/vk-gl-cts',
@@ -222,7 +222,7 @@ def validateTestCasePresence(report, mustpass, results):
 
 	failNum = 0
 	for ndx in range(len(mustpass)):
-		caseName = mustpass[ndx].decode('utf-8')
+		caseName = mustpass[ndx].decode('utf-8', 'ignore')
 
 		if caseName in caseNameToResultNdx:
 			resultNdx	= caseNameToResultNdx[caseName]
@@ -238,7 +238,7 @@ def validateTestCasePresence(report, mustpass, results):
 				report.warning(result.name + ": " + result.statusCode)
 		else:
 			if failNum < 21:
-				report.failure("Missing result for " + caseName.decode('utf-8'))
+				report.failure("Missing result for " + caseName.decode('utf-8', 'ignore'))
 				failNum += 1
 			anyError |= True
 

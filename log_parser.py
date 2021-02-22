@@ -95,7 +95,7 @@ class BatchResultParser:
 
 		f = open(filename, 'rb')
 		for line in f:
-			line = line.decode('utf-8')
+			line = line.decode('utf-8', 'ignore')
 			self.parseLine(line)
 			self.curLine += 1
 		f.close()

@@ -61,7 +61,7 @@ def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
 
 	pushWorkingDir(ctsPath)
 	try:
-		result = git('tag', '-l', releaseTagStr).decode('utf-8')
+		result = git('tag', '-l', releaseTagStr)
 	except:
 		pass
 	else:
@@ -78,11 +78,11 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 	report.message("Fetching HEAD commit of %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 	checkoutReleaseTag(report, releaseTagStr)
-	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
+	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr)
 	if isKCCTSRelease(releaseTagStr):
 		kcctsDir = os.path.join(ctsPath, 'external', 'kc-cts', 'src')
 		pushWorkingDir(kcctsDir)
-		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr).decode('utf-8')
+		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr)
 		popWorkingDir()
 	popWorkingDir()
 
@@ -96,7 +96,7 @@ def getGitCommitFromLog(package):
 		logPath	= os.path.join(package.basePath, logFile)
 		log		= readFile(logPath)
 		for line in log.splitlines():
-			args = line.decode('utf-8').split(' ')
+			args = line.decode('utf-8', 'ignore').split(' ')
 			if args[0] == "commit":
 				return args[1]
 	return "invalid"
@@ -115,7 +115,7 @@ def verifyStatement (report, package):
 	anyError		= False
 
 	for line in statement.splitlines():
-		line = line.decode('utf-8')
+		line = line.decode('utf-8', 'ignore')
 		if beginsWith(line, "CONFORM_VERSION:"):
 			if hasVersion:
 				report.failure("Multiple CONFORM_VERSIONs", package.statement)
@@ -177,7 +177,7 @@ def verifyGitStatus (report, package):
 	if len(package.gitStatus) > 0:
 		for s in package.gitStatus:
 			statusPath	= os.path.join(package.basePath, s)
-			status		= readFile(statusPath).decode('utf-8')
+			status		= readFile(statusPath).decode('utf-8', 'ignore')
 
 			if status.find("nothing to commit, working directory clean") < 0 and status.find("nothing to commit, working tree clean") < 0:
 				report.failure("Working directory is not clean")
@@ -205,7 +205,7 @@ def verifyGitStatusFiles (report, package, releaseTagStr):
 		report.passed("Verification of git status files PASSED")
 
 def sanitizePackageLog(log, report = None):
-	slog = log.decode('utf-8')
+	slog = log.decode('utf-8', 'ignore')
 	if report != None and slog != log:
 		report.warning("git log contains non-decodable symbols")
 	slog = slog.replace('\r\n', '\n')
@@ -220,7 +220,7 @@ def isGitLogEmpty (package, releaseLog, gitLog, report = None):
 
 	if report != None:
 		report.message("git log contains:", gitLog)
-		prisitineLog = prisitineLog.decode('utf-8')
+		prisitineLog = prisitineLog.decode('utf-8', 'ignore')
 		report.fmtmessage(prisitineLog)
 	if log == releaseLog[0]:
 		return True
