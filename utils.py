@@ -240,7 +240,7 @@ def validateTestCasePresence(report, mustpass, results):
 				report.warning(result.name + ": " + result.statusCode)
 		else:
 			if failNum < 21:
-				report.failure("Missing result for " + caseName.decode('utf-8', 'ignore'))
+				report.failure("Missing result for " + caseName)
 				failNum += 1
 			anyError |= True
 
