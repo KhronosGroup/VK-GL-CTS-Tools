@@ -37,6 +37,7 @@ class StatusCode:
 	CRASH					= 'Crash'
 	TIMEOUT					= 'Timeout'
 	WAIVER					= 'Waiver'
+	PARSE_ERROR				= 'ParseError'
 
 	STATUS_CODE_SET			= {
 		PASS,
@@ -50,7 +51,8 @@ class StatusCode:
 		INTERNAL_ERROR,
 		CRASH,
 		TIMEOUT,
-		WAIVER
+		WAIVER,
+		PARSE_ERROR
 		}
 
 	@staticmethod
@@ -166,6 +168,9 @@ class BatchResultParser:
 
 	def parseTestCaseResult (self, name, log):
 		try:
+			# The XML parser has troubles with invalid characters deliberately included in the shaders.
+			# This line removes such characters before calling the parser
+			log = bytes(log, 'utf-8').decode('utf-8', 'ignore')
 			doc = xml.dom.minidom.parseString(log)
 			resultItems = doc.getElementsByTagName('Result')
 			if len(resultItems) != 1:
@@ -174,7 +179,7 @@ class BatchResultParser:
 			statusCode		= resultItems[0].getAttributeNode('StatusCode').nodeValue
 			statusDetails	= getNodeText(resultItems[0])
 		except Exception as e:
-			statusCode		= StatusCode.INTERNAL_ERROR
+			statusCode		= StatusCode.PARSE_ERROR
 			statusDetails	= "XML parsing failed: %s" % str(e)
 
 		self.testCaseResults.append(TestCaseResult(name, statusCode, statusDetails, log))
