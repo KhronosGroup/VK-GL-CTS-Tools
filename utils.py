@@ -273,7 +273,7 @@ def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 				anyErrorTmp, resultOrderOk = validateTestCasePresence(report, fractionMustpass, results)
 				anyError |= anyErrorTmp
 
-				if anyError:
+				if anyErrorTmp:
 					report.failure("Verification of vk-fraction-mandatory-tests.txt results FAILED", filename)
 				else:
 					report.passed("Verification of vk-fraction-mandatory-tests.txt results PASSED", filename)
