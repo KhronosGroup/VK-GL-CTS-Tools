@@ -225,7 +225,7 @@ def validateTestCasePresence(report, mustpass, results):
 
 	failNum = 0
 	for ndx in range(len(mustpass)):
-		caseName = mustpass[ndx].decode('utf-8', 'ignore')
+		caseName = mustpass[ndx]
 
 		if caseName in caseNameToResultNdx:
 			resultNdx	= caseNameToResultNdx[caseName]
@@ -339,7 +339,7 @@ def readMustpass (report, filename):
 		report.failure("Failed to open %s" % filename)
 		return False, cases
 	for line in f:
-		s = line.strip()
+		s = line.strip().decode('utf-8', 'ignore')
 		if len(s) > 0:
 			cases.append(s)
 	return True, cases
