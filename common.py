@@ -205,9 +205,12 @@ def verifyGitStatusFiles (report, package, releaseTagStr):
 		report.passed("Verification of git status files PASSED")
 
 def sanitizePackageLog(log, report = None):
+	try:
+		log.decode('utf-8')
+	except UnicodeDecodeError:
+		if report != None:
+			report.warning("git log contains non-decodable symbols")
 	slog = log.decode('utf-8', 'ignore')
-	if report != None and slog != log:
-		report.warning("git log contains non-decodable symbols")
 	slog = slog.replace('\r\n', '\n')
 	slog = slog.replace('\t', '        ')
 	slog = re.sub(' \(.*(tag: .*)+\)', '', slog)
