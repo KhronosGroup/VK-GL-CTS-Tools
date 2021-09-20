@@ -340,8 +340,18 @@ def readMustpass (report, filename):
 	except Exception as e:
 		report.failure("Failed to open %s" % filename)
 		return False, cases
+
+	dirname = os.path.dirname(filename)
+
 	for line in f:
 		s = line.strip().decode('utf-8', 'ignore')
 		if len(s) > 0:
-			cases.append(s)
+			subfilename = os.path.join(dirname, s)
+			if os.path.isfile(subfilename):
+				success, subcases = readMustpass(report, subfilename)
+				cases.extend(subcases)
+				if not success:
+					return False, cases
+			else:
+				cases.append(s)
 	return True, cases

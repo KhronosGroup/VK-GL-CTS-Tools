@@ -65,7 +65,7 @@ def getMustpass (report, api, ctsPath, releaseTagStr):
 	popWorkingDir()
 
 	if success == True and fractionSuccess == True:
-		report.message("Successfully fetched mustpass for %s" % releaseTagStr)
+		report.message("Successfully fetched mustpass for %s, num tests %d" % (releaseTagStr, len(mustpass)))
 	else:
 		report.failure("Failed to fetch mustpass for %s" % releaseTagStr)
 	return (success and fractionSuccess), mustpass, fractionMustpass
