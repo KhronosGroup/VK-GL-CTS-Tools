@@ -61,20 +61,16 @@ NOT_MASTER_DIR		= ['vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
 					   'vulkan-cts-1\.1\.3\.[0-9]*',
 					   'vulkan-cts-1\.1\.4\.[0-9]*']
 API_TYPE_DICT		= {'VK' : 'Vulkan', 'GL' : 'OpenGL', 'ES' : 'OpenGL ES'}
-API_VERSION_DICT	= {'10' : '1.0', '11' : '1.1', '12' : '1.2',
-					   '20' : '2.0',
-					   '30' : '3.0', '31' : '3.1', '32' : '3.2', '33' : '3.3',
-					   '40' : '4.0', '41' : '4.1', '42' : '4.2', '43' : '4.3',
-					   '44' : '4.4', '45' : '4.5', '46' : '4.6'}
-ES_SUPPORTED_VERSIONS = ['20', '30', '31', '32']
+API_VERSION_REGEX	= ".*\-cts\-([0-9]+)\.([0-9]+)\..+"
 RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
 KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-9]*\.[0-9]*"]
 
 class Verification:
-	def __init__(self, packagePath, ctsPath, api, releaseTag):
+	def __init__(self, packagePath, ctsPath, api, version, releaseTag):
 		self.packagePath	= packagePath
 		self.ctsPath		= ctsPath
 		self.api			= api
+		self.version		= version
 		self.releaseTag		= releaseTag
 
 def beginsWith (str, prefix):
@@ -203,12 +199,12 @@ def verifyFileIntegrity(report, filename, info, gitSHA):
 			report.failure("Test log %s doesn't match the HEAD commit from git log: %s" % (releaseIdKey, gitSHA))
 	return anyError
 
-def isSubmissionSupported(apiType, apiVersion):
+def isSubmissionSupported(apiType):
 	if apiType == "VK":
 		return True
 	if apiType == "GL":
 		return True
-	if apiType == "ES" and apiVersion in ES_SUPPORTED_VERSIONS:
+	if apiType == "ES":
 		return True
 	return False
 
@@ -272,11 +268,11 @@ def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 
 			if isFractionResults:
 				report.message("Verifying vk-fraction-mandatory-tests.txt results.", filename)
-				anyErrorTmp, resultOrderOk = validateTestCasePresence(report, fractionMustpass, results)
-				anyError |= anyErrorTmp
+				anyErrorFract, resultOrderOk = validateTestCasePresence(report, fractionMustpass, results)
 
-				if anyError:
+				if anyErrorFract:
 					report.failure("Verification of vk-fraction-mandatory-tests.txt results FAILED", filename)
+					anyError |= anyErrorFract
 				else:
 					report.passed("Verification of vk-fraction-mandatory-tests.txt results PASSED", filename)
 
@@ -288,16 +284,16 @@ def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 				totalResults += results
 
 		report.message("Verifying vk-default.txt results.")
-		anyErrorTmp , resultOrderOk= validateTestCasePresence(report, mustpass, totalResults)
-		anyError |= anyErrorTmp
+		anyErrorMustpass, resultOrderOk = validateTestCasePresence(report, mustpass, totalResults)
 
 		# Verify number of results
 		if len(totalResults) != len(mustpass):
 			report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass), len(totalResults)))
-			anyError |= True
+			anyErrorMustpass |= True
 
-		if anyError:
+		if anyErrorMustpass:
 			report.failure("Verification of vk-default.txt results FAILED")
+			anyError |= anyErrorMustpass
 		else:
 			report.passed("Verification of vk-default.txt results PASSED")
 
@@ -319,15 +315,15 @@ def verifyTestLogES (report, filename, mustpass, gitSHA):
 		report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass), len(results)), filename)
 		anyError |= True
 
-	anyErrorTmp , resultOrderOk= validateTestCasePresence(report, mustpass, results)
-	anyError |= anyErrorTmp
+	anyErrorMustpass, resultOrderOk = validateTestCasePresence(report, mustpass, results)
 
 	if len(results) == len(mustpass) and not resultOrderOk:
 		report.failure("Results are not in the expected order", filename)
-		anyError |= True
+		anyErrorMustpass |= True
 
-	if anyError:
+	if anyErrorMustpass:
 		report.failure("Verification of test results FAILED", filename)
+		anyError |= anyErrorMustpass
 	else:
 		report.passed("Verification of test results PASSED", filename)
 

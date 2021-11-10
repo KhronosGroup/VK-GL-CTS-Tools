@@ -93,14 +93,14 @@ if __name__ == "__main__":
 		if releaseTag != None:
 			submissionType	= packageFileBN[idx + 1 : idx + 5]
 			apiType			= submissionType[:2]
-			apiVersion		= submissionType[2:]
-			if apiType not in API_TYPE_DICT or apiVersion not in API_VERSION_DICT:
+			apiVersion		= submissionType[2:3] + "." + submissionType[3:]
+			if apiType not in API_TYPE_DICT:
 				report.failure("Incorrect package name: %s. The file should be named as \<API\>\<API version\>_\<Adopter\>_\<Info\>.tgz. See the README for more info." % packageFileBN)
 			else:
-				apiName		= API_TYPE_DICT[apiType] + ' ' + API_VERSION_DICT[apiVersion]
+				apiName		= API_TYPE_DICT[apiType] + ' ' + apiVersion
 
-				verification = Verification(packagePath, ctsPath, apiType, releaseTag)
-				if isSubmissionSupported(apiType, apiVersion):
+				verification = Verification(packagePath, ctsPath, apiType, apiVersion, releaseTag)
+				if isSubmissionSupported(apiType):
 					report.message("Started verification for %s" % apiName, packageFileBN)
 					verify(report, verification)
 				else:

@@ -33,7 +33,7 @@ def isKCCTSRelease(releaseTagStr):
 			return True
 	return False
 
-def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
+def verifyReleaseTagAndApi(report, ctsPath, api, version, releaseTag):
 	releaseTagStr = releaseTag
 	if not beginsWith(releaseTagStr, RELEASE_TAG_DICT[api]):
 		report.failure("Release tag %s is not supported by automated verification" % releaseTagStr)
@@ -58,6 +58,15 @@ def verifyReleaseTagAndApi(report, ctsPath, api, releaseTag):
 	if matchFound == False:
 		report.failure("Release tag %s is not supported by automated verification" % releaseTagStr)
 		return False
+
+	m = re.match(API_VERSION_REGEX, releaseTagStr)
+	if m:
+		apiMajor = int(m.group(1))
+		apiMinor = int(m.group(2))
+		apiVersion = version.split(".")
+		if (apiMajor < int(apiVersion[0])) or ((apiMajor == int(apiVersion[0])) and (apiMinor < int(apiVersion[1]))):
+			report.failure("Release tag %s cannot be used for submission for %s submission package" % (releaseTagStr, RELEASE_TAG_DICT[api] + " " + version))
+			return False
 
 	pushWorkingDir(ctsPath)
 	try:
@@ -307,14 +316,14 @@ def verifyPatches (report, package, releaseLog):
 	else:
 		report.passed("Verification of patches PASSED")
 
-def verify (report, verfification):
+def verify (report, verification):
 	report.reportSubTitle("Package verification")
-	res = verifyReleaseTagAndApi(report, verfification.ctsPath, verfification.api, verfification.releaseTag)
+	res = verifyReleaseTagAndApi(report, verification.ctsPath, verification.api, verification.version, verification.releaseTag)
 	if res == False:
 		return
-	releaseTagStr	= verfification.releaseTag
-	package			= getPackageDescription(report, verfification.packagePath)
-	releaseLog		= getReleaseLog(report, verfification.ctsPath, releaseTagStr)
+	releaseTagStr	= verification.releaseTag
+	package			= getPackageDescription(report, verification.packagePath)
+	releaseLog		= getReleaseLog(report, verification.ctsPath, releaseTagStr)
 	gitSHA			= getGitCommitFromLog(package)
 
 	verifyStatement(report, package)
@@ -322,10 +331,10 @@ def verify (report, verfification):
 	verifyGitLogFiles(report, package, releaseLog, releaseTagStr)
 	verifyPatches(report, package, releaseLog)
 
-	if verfification.api == 'VK':
-		verify_vk(report, verfification, package, gitSHA)
-	elif verfification.api == 'GL' or verfification.api == 'ES':
-		verify_es(report, verfification, package, gitSHA)
+	if verification.api == 'VK':
+		verify_vk(report, verification, package, gitSHA)
+	elif verification.api == 'GL' or verification.api == 'ES':
+		verify_es(report, verification, package, gitSHA)
 
 	for item in package.otherItems:
 		report.failure("Unknown file", item)
