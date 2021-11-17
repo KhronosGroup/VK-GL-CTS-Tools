@@ -23,6 +23,7 @@
 
 import os
 import subprocess
+import sys
 import tarfile
 import tempfile
 
@@ -113,6 +114,31 @@ def git (*args):
 	if process.returncode != 0:
 		raise Exception("Failed to execute '%s', got %d" % (str(args), process.returncode))
 	return output.decode('utf-8', 'ignore')
+
+def fetchSources(script):
+	args	= [[],
+			   ['--protocol=ssh'],
+			   ['--protocol=https'],
+			   ['--insecure'],
+			   ['--protocol=ssh', '--insecure'],
+			   ['--protocol=https', '--insecure']]
+
+	returncode = subprocess.call([sys.executable, script, '--clean'])
+	if returncode != 0:
+		raise Exception("Failed to clean external sources, got %d" % (process.returncode))
+
+	success = False
+
+	for arg in args:
+		params = [sys.executable, script]
+		params.extend(arg)
+		returncode = subprocess.call(params)
+		if returncode == 0:
+			success = True
+			break
+
+	if not success:
+		raise Exception("Could not fetch sources")
 
 def cloneCTS(dest):
 	repos		= ['ssh://gerrit.khronos.org:29418/vk-gl-cts',

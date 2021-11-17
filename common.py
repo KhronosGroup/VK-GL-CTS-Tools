@@ -89,7 +89,8 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 	checkoutReleaseTag(report, releaseTagStr)
 	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr)
 	if isKCCTSRelease(releaseTagStr):
-		kcctsDir = os.path.join(ctsPath, 'external', 'kc-cts', 'src')
+		kcctsDir = os.path.join('external', 'kc-cts', 'src')
+		fetchSources(os.path.join('external', 'fetch_kc_cts.py'))
 		pushWorkingDir(kcctsDir)
 		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr)
 		popWorkingDir()
