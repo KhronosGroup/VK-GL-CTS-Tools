@@ -99,56 +99,58 @@ def verifyConfigFile (report, filename, type):
 			else:
 				report.failure("%s failed" % caseResult)
 
-def verifyMustpassCases(report, package, mustpassCases, type):
-	messages = []
-	apiToTestBase = { "es32" : ["gles32", "gles31", "gles3", "gles2", "egl"],
-				  "es31" : ["gles31", "gles3", "gles2", "egl"],
-				  "es3"  : ["gles3", "gles2", "egl"],
-				  "es2"  : ["gles2", "egl"],
-				  "gl46" : ["gl46"],
-				  "gl45" : ["gl45"],
-				  "gl44" : ["gl44"],
-				  "gl43" : ["gl43"],
-				  "gl42" : ["gl42"],
-				  "gl41" : ["gl41"],
-				  "gl40" : ["gl40"],
-				  "gl33" : ["gl33"],
-				  "gl32" : ["gl32"],
-				  "gl31" : ["gl31"],
-				  "gl30" : ["gl30"],
-				  }
+def getConfigVersion(report, api):
+	m = re.match("gl([0-9]+)", api)
+	if m:
+		return ("gl", int(m.group(1)))
 
-	apiToTestNoCTX = { "gl46" : ["gl45", "gl43", "gl40", "gl30"],
-					   "gl45" : ["gl45", "gl43", "gl40", "gl30"],
-					   "gl44" : ["gl40", "gl30"],
-					   "gl43" : ["gl40", "gl30"],
-					   "gl42" : ["gl40", "gl30"],
-					   "gl41" : ["gl40", "gl30"],
-					   "gl40" : ["gl40", "gl30"],
-					   "gl33" : ["gl30"],
-					   "gl32" : ["gl30"],
-					   "gl31" : ["gl30"],
-					   "gl30" : ["gl30"],
-					}
+	m = re.match(".*es([0-9]+)", api)
+	if m:
+		# eg. gles3 == version 30
+		version = int(m.group(1))
+		if version < 10:
+			version = version * 10
+		return ("gles", version)
+
+	if api == "egl":
+		return ("egl", 0)
+
+	report.failure("Unknown API version %s, cannot automatically verify" % (api))
+	return ("", 0)
+
+def verifyMustpassCases(report, package, mustpassCases, type):
+	typeApi, typeVersion = getConfigVersion(report, type)
+
 	for mustpass in mustpassCases:
 		mustpassXML = os.path.join(mustpass, "mustpass.xml")
 		doc = xml.dom.minidom.parse(mustpassXML)
-		apiToTest = apiToTestBase
-		if "GL NoContext" in doc.getElementsByTagName("TestPackage")[0].getAttributeNode("name").nodeValue:
-			apiToTest = apiToTestNoCTX
-		testConfigs = doc.getElementsByTagName("Configuration")
-		# check that all configs that must be tested are present
+		configs = doc.getElementsByTagName("Configuration")
+
+		testConfigs = []
+		testConfigVersion = 0
+
+		if "GL NoContext" in doc.getElementsByTagName("TestPackage")[0].getAttributeNode("name").nodeValue or typeApi != "gl":
+			# No context and non-gl tests all configs less than or equal to type version
+			for config in configs:
+				caseListFile = config.getAttributeNode("caseListFile").nodeValue
+				_, configVersion = getConfigVersion(report, caseListFile.split('-')[0])
+				if configVersion <= typeVersion:
+					testConfigs.append(config)
+		else:
+			# For GL check for the configs which must be tested (largest version less than "type")
+			for config in configs:
+				caseListFile = config.getAttributeNode("caseListFile").nodeValue
+				_, configVersion = getConfigVersion(report, caseListFile.split('-')[0])
+				if configVersion == testConfigVersion:
+					testConfigs.append(config)
+				elif configVersion > testConfigVersion and configVersion <= typeVersion:
+					testConfigVersion = configVersion
+					testConfigs = [config]
+
+		# Check that all of the test configs are present
+		totalMatches = []
 		for testConfig in testConfigs:
 			caseListFile = testConfig.getAttributeNode("caseListFile").nodeValue
-			# identify APIs that must be tested for the given type
-			apis = apiToTest[type]
-			# identify API tested by the current config
-			configAPI = caseListFile.split('-')[0]
-			if configAPI in apis:
-				# the API in this config is expected to be tested
-				mustTest = True
-			else:
-				mustTest = False
 			pattern = "config-" + os.path.splitext(caseListFile)[0] + "-cfg-[0-9]*"+"-run-[0-9]*"
 			cmdLine = testConfig.getAttributeNode("commandLine").nodeValue
 			cfgItems = {'height':None, 'width':None, 'seed':None, 'rotation':None}
@@ -168,15 +170,20 @@ def verifyMustpassCases(report, package, mustpassCases, type):
 			pattern += ".qpa"
 			p = re.compile(pattern)
 			matches = [m for l in mustpassCases[mustpass] for m in (p.match(l),) if m]
-			if len(matches) == 0 and mustTest == True:
+
+			if len(matches) == 0:
 					conformOs = testConfig.getAttributeNode("os").nodeValue
 					txt = "Configuration %s %s was not executed" % (caseListFile, cmdLine)
 					if conformOs == "any" or (package.conformOs != None and conformOs in package.conformOs.lower()):
 						report.failure(txt)
 					else:
 						report.warning(txt)
-			elif len(matches) != 0 and mustTest == False:
-				report.failure("Configuration %s %s was not expected to be tested but present in cts-run-summary.xml" % (caseListFile, cmdLine))
+			else:
+				totalMatches.extend([m.string for m in matches])
+
+		extraConfigs = list(set(mustpassCases[mustpass]) - set(totalMatches))
+		for config in extraConfigs:
+			report.failure("Configuration %s was not expected to be tested but present in cts-run-summary.xml" % (config))
 
 def verifyTestLogs(report, package, gitSHA, ctsPath):
 	if package.summary == None:
