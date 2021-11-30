@@ -173,11 +173,11 @@ def verifyMustpassCases(report, package, mustpassCases, type):
 
 			if len(matches) == 0:
 					conformOs = testConfig.getAttributeNode("os").nodeValue
-					txt = "Configuration %s %s was not executed" % (caseListFile, cmdLine)
+					txt = "Configuration %s %s %s was not executed" % (conformOs, caseListFile, cmdLine)
 					if conformOs == "any" or (package.conformOs != None and conformOs in package.conformOs.lower()):
 						report.failure(txt)
 					else:
-						report.warning(txt)
+						report.warning(txt + " due to N/A on OS (%s)" % ("None" if package.conformOs == None else package.conformOs))
 			else:
 				totalMatches.extend([m.string for m in matches])
 
