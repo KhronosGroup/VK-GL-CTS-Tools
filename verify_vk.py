@@ -49,7 +49,6 @@ def getMustpass (report, api, ctsPath, releaseTagStr):
 	report.message("Fetching mustpass for %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 
-	checkoutReleaseTag(report, releaseTagStr)
 	assert api == 'VK'
 
 	mustpassDir		= getMustpassDir(api, releaseTagStr)

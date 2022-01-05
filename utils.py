@@ -190,6 +190,16 @@ def checkoutReleaseTag(report, releaseTag):
 		success = True
 	return success
 
+def applyPatch(report, patch):
+	success = False
+	try:
+		git('apply', '--whitespace=nowarn', patch)
+	except:
+		report.failure("Failed to apply patch %s" % patch)
+	else:
+		success = True
+	return success
+
 def readTestLog (filename):
 	parser = BatchResultParser()
 	return parser.parseFile(filename)

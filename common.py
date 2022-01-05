@@ -99,6 +99,77 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 	report.message("Successfully fetched HEAD commit of %s" % releaseTagStr)
 	return releaseLog
 
+def applyPatches(report, patches):
+	for path in patches.keys():
+		pushWorkingDir(path)
+		if len(patches[path]) > 0:
+			report.message("Applying %d patches to %s" % (len(patches[path]), path))
+		for patch in reversed(patches[path]):
+			if not applyPatch(report, patch):
+				return
+		popWorkingDir()
+
+def getPatchFiles(verification, package, releaseLog, gitLog, report):
+	patches = []
+
+	commitPattern = r'commit\s([a-f0-9]+)\s'
+	patchPattern  = r'From\s([a-f0-9]+)\s'
+
+	logPath	= os.path.join(package.basePath, gitLog)
+	log		= readFile(logPath)
+	log 	= sanitizePackageLog(log)
+
+	releaseCommit = [None, None]
+	for (index, rlog) in enumerate(releaseLog):
+		if rlog != None:
+			m = re.search(commitPattern, rlog)
+
+			if m != None:
+				releaseCommit[index] = m.group(1)
+			else:
+				report.failure("Cannot find commit sha in release log")
+				return (None, None)
+
+	lastCommit = ''
+	anyError = False
+
+	for m in re.finditer(commitPattern, log):
+		commit = m.group(1)
+		lastCommit = commit
+
+		if commit == releaseCommit[0]:
+			continue
+		elif releaseCommit[1] != None and commit == releaseCommit[1]:
+			continue
+		else:
+			# There must exist a patch with this commit
+			found = False
+			for patch in package.patches:
+				patchPath = os.path.join(package.basePath, patch)
+				patchData = readFile(patchPath)
+				patchData = sanitizePackageLog(patchData)
+
+				n = re.search(patchPattern, patchData)
+
+				if n != None and n.group(1) == commit:
+					patches.append(patchPath)
+					found = True
+					break
+			if not found:
+				report.failure("Commit %s in log not found in patch files" % (commit))
+				anyError = True
+
+	if anyError:
+		return (None, None)
+
+	if lastCommit == releaseCommit[0]:
+		return (verification.ctsPath, patches)
+	elif releaseCommit[1] != None and lastCommit == releaseCommit[1]:
+		return (os.path.join(verification.ctsPath, 'external', 'kc-cts', 'src'), patches)
+
+	report.failure("Base commit in log %s is not release tag" % (lastCommit))
+	return (None, None)
+
 def getGitCommitFromLog(package):
 	for logFile, path in package.gitLog:
 		if "kc-cts" in logFile:
@@ -268,8 +339,7 @@ def verifyGitLog (report, package, releaseLog):
 			if isEmpty:
 				report.passed("Log exactly matches HEAD of %s" % package.conformVersion)
 			else:
-				report.warning("Log is not empty", log)
-				anyWarn |= True
+				report.message("Log is not empty", log)
 	else:
 		report.failure("Missing git log files")
 		anyError = True
@@ -297,11 +367,12 @@ def verifyGitLogFiles (report, package, releaseLog, releaseTag):
 	if not anyError and not anyWarn:
 		report.passed("Verification of git log files PASSED")
 
-def verifyPatches (report, package, releaseLog):
+def verifyPatches (report, verification, package, releaseLog):
 	anyError = False
 	report.message("Verifying patches")
 	hasPatches	= len(package.patches)
 	logEmpty	= True
+	patches		= {}
 	for log, path in package.gitLog:
 		logEmpty &= isGitLogEmpty(package, releaseLog, log)
 
@@ -311,11 +382,20 @@ def verifyPatches (report, package, releaseLog):
 	elif not hasPatches and not logEmpty:
 		report.failure("Test log is not empty but package doesn't contain patches")
 		anyError = True
+	elif not logEmpty:
+		for log, path in package.gitLog:
+			(applyPath, patchFiles) = getPatchFiles(verification, package, releaseLog, log, report)
+			if patchFiles != None:
+				patches[applyPath] = patchFiles
+			else:
+				anyError = True
 
 	if anyError:
 		report.failure("Verification of patch FAILED")
+		return None
 	else:
 		report.passed("Verification of patches PASSED")
+		return patches
 
 def verify (report, verification):
 	report.reportSubTitle("Package verification")
@@ -330,7 +410,10 @@ def verify (report, verification):
 	verifyStatement(report, package)
 	verifyGitStatusFiles(report, package, releaseTagStr)
 	verifyGitLogFiles(report, package, releaseLog, releaseTagStr)
-	verifyPatches(report, package, releaseLog)
+	patches = verifyPatches(report, verification, package, releaseLog)
+
+	if patches != None:
+		applyPatches(report, patches)
 
 	if verification.api == 'VK':
 		verify_vk(report, verification, package, gitSHA)
