@@ -22,6 +22,7 @@
 #-------------------------------------------------------------------------
 
 import os
+import re
 import sys
 import argparse
 
@@ -91,9 +92,15 @@ if __name__ == "__main__":
 		releaseTag = findReleaseTag(report, packagePath)
 
 		if releaseTag != None:
-			submissionType	= packageFileBN[idx + 1 : idx + 5]
-			apiType			= submissionType[:2]
-			apiVersion		= submissionType[2:3] + "." + submissionType[3:]
+			submissionType	= packageFileBN[idx + 1:].split("_")[0]
+			m				= re.search(r'\d', submissionType)
+			if m:
+				idx				= m.start()
+				apiType			= submissionType[:idx]
+				apiVersion		= submissionType[idx:idx + 1] + "." + submissionType[idx + 1:]
+			else:
+				apiType = "Invalid"
+
 			if apiType not in API_TYPE_DICT:
 				report.failure("Incorrect package name: %s. The file should be named as \<API\>\<API version\>_\<Adopter\>_\<Info\>.tgz. See the README for more info." % packageFileBN)
 			else:

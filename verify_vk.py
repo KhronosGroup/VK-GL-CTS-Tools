@@ -45,14 +45,23 @@ def getMustpassDir(api, releaseTagStr):
 
 	return mustpassDir
 
+def getMustpassName(api):
+	assert api == 'VK' or api == 'VKSC'
+
+	if api == "VK":
+		return "vk-default.txt"
+	elif api == "VKSC":
+		return "vksc-default.txt"
+
+	return None
+
 def getMustpass (report, api, ctsPath, releaseTagStr):
 	report.message("Fetching mustpass for %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 
-	assert api == 'VK'
-
 	mustpassDir		= getMustpassDir(api, releaseTagStr)
-	mustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, 'vk-default.txt')
+	mustpassName	= getMustpassName(api)
+	mustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, mustpassName)
 	success, mustpass = readMustpass(report, mustpassPath)
 
 	fractionMustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, 'vk-fraction-mandatory-tests.txt')
