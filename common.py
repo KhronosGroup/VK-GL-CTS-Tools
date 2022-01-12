@@ -415,7 +415,7 @@ def verify (report, verification):
 	if patches != None:
 		applyPatches(report, patches)
 
-	if verification.api == 'VK':
+	if verification.api == 'VK' or verification.api == 'VKSC':
 		verify_vk(report, verification, package, gitSHA)
 	elif verification.api == 'GL' or verification.api == 'ES':
 		verify_es(report, verification, package, gitSHA)

@@ -40,6 +40,7 @@ ALLOWED_STATUS_CODES = set([
 	])
 
 SUPPORTED_RELEASES	= ['vulkan-cts-[0-9]\.[0-9]\.[0-9]*\.[0-9]*',
+					   'vulkansc-cts-1\.0\.[0-9]*\.[0-9]*',
 					   'opengl-cts-4\.6\.[0-9]*\.[0-9]*',
 					   'opengl-es-cts-3\.2\.[2-9]*\.[0-9]*']
 WITHDRAWN_RELEASES	= ['vulkan-cts-1\.0\.0\.[0-9]*',
@@ -62,9 +63,9 @@ NOT_MASTER_DIR		= ['vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
 					   'vulkan-cts-1\.1\.2\.[0-9]*',
 					   'vulkan-cts-1\.1\.3\.[0-9]*',
 					   'vulkan-cts-1\.1\.4\.[0-9]*']
-API_TYPE_DICT		= {'VK' : 'Vulkan', 'GL' : 'OpenGL', 'ES' : 'OpenGL ES'}
+API_TYPE_DICT		= {'VK' : 'Vulkan', 'VKSC' : 'Vulkan SC', 'GL' : 'OpenGL', 'ES' : 'OpenGL ES'}
 API_VERSION_REGEX	= ".*\-cts\-([0-9]+)\.([0-9]+)\..+"
-RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
+RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'VKSC' : 'vulkansc-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
 KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-9]*\.[0-9]*"]
 
 class Verification:
@@ -238,6 +239,8 @@ def verifyFileIntegrity(report, filename, info, gitSHA):
 
 def isSubmissionSupported(apiType):
 	if apiType == "VK":
+		return True
+	if apiType == "VKSC":
 		return True
 	if apiType == "GL":
 		return True
