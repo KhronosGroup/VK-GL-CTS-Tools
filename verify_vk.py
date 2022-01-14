@@ -59,24 +59,26 @@ def getMustpass (report, api, ctsPath, releaseTagStr):
 	report.message("Fetching mustpass for %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 
-	mustpassDir		= getMustpassDir(api, releaseTagStr)
+	mustpassDir	= getMustpassDir(api, releaseTagStr)
 	mustpassName	= getMustpassName(api)
 	mustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, mustpassName)
-	success, mustpass = readMustpass(report, mustpassPath)
+	mustpass	= Mustpass(mustpassPath)
 
 	fractionMustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, 'vk-fraction-mandatory-tests.txt')
-	fractionSuccess = True
 	fractionMustpass = None
 	if os.path.isfile(fractionMustpassPath):
-		fractionSuccess, fractionMustpass = readMustpass(report, fractionMustpassPath)
+		fractionMustpass = Mustpass(fractionMustpassPath)
 
 	popWorkingDir()
+	result = True
 
-	if success == True and fractionSuccess == True:
-		report.message("Successfully fetched mustpass for %s, num tests %d" % (releaseTagStr, len(mustpass)))
+	if mustpass.read(report) and (fractionMustpass is None or fractionMustpass.read(report)):
+		report.message("Successfully fetched mustpass for %s, num tests %d" % (releaseTagStr, len(mustpass.cases)))
 	else:
 		report.failure("Failed to fetch mustpass for %s" % releaseTagStr)
-	return (success and fractionSuccess), mustpass, fractionMustpass
+		result = False
+
+	return result, mustpass, fractionMustpass
 
 def verifyTestLogs (report, package, mustpass, fractionMustpass, gitSHA):
 
@@ -96,5 +98,5 @@ def verifyTestLogs (report, package, mustpass, fractionMustpass, gitSHA):
 def verify_vk (report, verfification, package, gitSHA):
 	releaseTagStr = verfification.releaseTag
 	success, mustpass, fractionMustpass = getMustpass(report, verfification.api, verfification.ctsPath, releaseTagStr)
-	if success == True:
+	if success:
 		verifyTestLogs(report, package, mustpass, fractionMustpass, gitSHA)
