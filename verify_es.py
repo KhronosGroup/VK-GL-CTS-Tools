@@ -210,8 +210,8 @@ def verifyTestLogs(report, package, gitSHA, ctsPath):
 			mpCase = []
 		mpCase.append(runLog)
 		mustpassCases[os.path.dirname(mustpassFile)] = mpCase
-		success, mustpass = readMustpass(report, mustpassFile)
-		if success == True:
+		mustpass = Mustpass(mustpassFile)
+		if mustpass.read(report):
 			verifyTestLogES(report, os.path.join(package.basePath, runLog), mustpass, gitSHA)
 
 	verifyMustpassCases(report, package, mustpassCases, summary.type)

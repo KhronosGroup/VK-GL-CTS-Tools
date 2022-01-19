@@ -68,6 +68,45 @@ API_VERSION_REGEX	= ".*\-cts\-([0-9]+)\.([0-9]+)\..+"
 RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'VKSC' : 'vulkansc-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
 KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-9]*\.[0-9]*"]
 
+class Mustpass:
+	def __init__(self, filename):
+		self.filename = filename
+		self.basename = os.path.basename(filename)
+		self.cases    = []
+
+	def _read(self, report, filename):
+		cases = []
+		try:
+			f = open(filename, 'rb')
+		except Exception as e:
+			report.failure("Failed to open %s" % (filename))
+			return None
+
+		dirname = os.path.dirname(filename)
+		basename = os.path.basename(filename)
+
+		for line in f:
+			s = line.strip().decode('utf-8', 'ignore')
+			if len(s) > 0:
+				subfilename = os.path.join(dirname, s)
+				if os.path.isfile(subfilename):
+					subcases = self._read(report, subfilename)
+					if subcases is not None:
+						cases.extend(subcases)
+					else:
+						return None 
+				else:
+					cases.append(s)
+		return cases
+
+	def read(self, report):
+		subcases = self._read(report, self.filename)
+		if subcases is not None:
+			self.cases = subcases
+			return True
+		else:
+			return False
+
 class Verification:
 	def __init__(self, packagePath, ctsPath, api, version, releaseTag):
 		self.packagePath	= packagePath
@@ -262,8 +301,8 @@ def validateTestCasePresence(report, mustpass, results):
 			anyError |= True
 
 	failNum = 0
-	for ndx in range(len(mustpass)):
-		caseName = mustpass[ndx]
+	for ndx in range(len(mustpass.cases)):
+		caseName = mustpass.cases[ndx]
 
 		if caseName in caseNameToResultNdx:
 			resultNdx	= caseNameToResultNdx[caseName]
@@ -290,9 +329,9 @@ def validateTestCasePresence(report, mustpass, results):
 
 def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 	# Mustpass case names must be unique
-	assert len(mustpass) == len(set(mustpass))
+	assert len(mustpass.cases) == len(set(mustpass.cases))
 	if fractionMustpass != None:
-		assert len(fractionMustpass) == len(set(fractionMustpass))
+		assert len(fractionMustpass.cases) == len(set(fractionMustpass.cases))
 
 	anyError		= False
 	for key, filesList in package.testLogs.items():
@@ -307,41 +346,41 @@ def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 			anyError |= verifyFileIntegrity(report, filename, info, gitSHA)
 
 			if isFractionResults:
-				report.message("Verifying vk-fraction-mandatory-tests.txt results.", filename)
+				report.message("Verifying %s results." % (fractionMustpass.basename), filename)
 				anyErrorFract, resultOrderOk = validateTestCasePresence(report, fractionMustpass, results)
 
 				if anyErrorFract:
-					report.failure("Verification of vk-fraction-mandatory-tests.txt results FAILED", filename)
+					report.failure("Verification of %s results FAILED" % (fractionMustpass.basename), filename)
 					anyError |= anyErrorFract
 				else:
-					report.passed("Verification of vk-fraction-mandatory-tests.txt results PASSED", filename)
+					report.passed("Verification of %s results PASSED" % (fractionMustpass.basename), filename)
 
 			if addFullResults:
 				totalResults += results
 				addFullResults = False
 			else:
-				results = [r for r in results if r.name not in fractionMustpass]
+				results = [r for r in results if r.name not in fractionMustpass.cases]
 				totalResults += results
 
-		report.message("Verifying vk-default.txt results.")
+		report.message("Verifying %s results." % (mustpass.basename))
 		anyErrorMustpass, resultOrderOk = validateTestCasePresence(report, mustpass, totalResults)
 
 		# Verify number of results
-		if len(totalResults) != len(mustpass):
-			report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass), len(totalResults)))
+		if len(totalResults) != len(mustpass.cases):
+			report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass.cases), len(totalResults)))
 			anyErrorMustpass |= True
 
 		if anyErrorMustpass:
-			report.failure("Verification of vk-default.txt results FAILED")
+			report.failure("Verification of %s results FAILED" % (mustpass.basename))
 			anyError |= anyErrorMustpass
 		else:
-			report.passed("Verification of vk-default.txt results PASSED")
+			report.passed("Verification of %s results PASSED" % (mustpass.basename))
 
 	return anyError
 
 def verifyTestLogES (report, filename, mustpass, gitSHA):
 	# Mustpass case names must be unique
-	assert len(mustpass) == len(set(mustpass))
+	assert len(mustpass.cases) == len(set(mustpass.cases))
 
 	report.message("Reading results.", filename)
 	results, info	= readTestLog(filename)
@@ -351,8 +390,8 @@ def verifyTestLogES (report, filename, mustpass, gitSHA):
 	anyError |= verifyFileIntegrity(report, filename, info, gitSHA)
 
 	# Verify number of results
-	if len(results) != len(mustpass):
-		report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass), len(results)), filename)
+	if len(results) != len(mustpass.cases):
+		report.failure("Wrong number of test results, expected %d, found %d" % (len(mustpass.cases), len(results)), filename)
 		anyError |= True
 
 	anyErrorMustpass, resultOrderOk = validateTestCasePresence(report, mustpass, results)
@@ -368,26 +407,3 @@ def verifyTestLogES (report, filename, mustpass, gitSHA):
 		report.passed("Verification of test results PASSED", filename)
 
 	return anyError
-
-def readMustpass (report, filename):
-	cases = []
-	try:
-		f = open(filename, 'rb')
-	except Exception as e:
-		report.failure("Failed to open %s" % filename)
-		return False, cases
-
-	dirname = os.path.dirname(filename)
-
-	for line in f:
-		s = line.strip().decode('utf-8', 'ignore')
-		if len(s) > 0:
-			subfilename = os.path.join(dirname, s)
-			if os.path.isfile(subfilename):
-				success, subcases = readMustpass(report, subfilename)
-				cases.extend(subcases)
-				if not success:
-					return False, cases
-			else:
-				cases.append(s)
-	return True, cases
