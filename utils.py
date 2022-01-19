@@ -396,7 +396,7 @@ def verifyTestLogES (report, filename, mustpass, gitSHA):
 
 	anyErrorMustpass, resultOrderOk = validateTestCasePresence(report, mustpass, results)
 
-	if len(results) == len(mustpass) and not resultOrderOk:
+	if len(results) == len(mustpass.cases) and not resultOrderOk:
 		report.failure("Results are not in the expected order", filename)
 		anyErrorMustpass |= True
 
