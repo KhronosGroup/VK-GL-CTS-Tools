@@ -4,7 +4,7 @@
 # VK-GL-CTS Conformance Submission Verification
 # ---------------------------------------------
 #
-# Copyright 2020-2021 The Khronos Group Inc.
+# Copyright 2020-2022 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,8 +95,8 @@ def verifyTestLogs (report, package, mustpass, fractionMustpass, gitSHA):
 	else:
 		report.passed("Verification of test logs PASSED")
 
-def verify_vk (report, verfification, package, gitSHA):
-	releaseTagStr = verfification.releaseTag
-	success, mustpass, fractionMustpass = getMustpass(report, verfification.api, verfification.ctsPath, releaseTagStr)
+def verify_vk (report, verification, package, gitSHA):
+	releaseTagStr = verification.releaseTag
+	success, mustpass, fractionMustpass = getMustpass(report, verification.api, verification.ctsPath, releaseTagStr)
 	if success:
 		verifyTestLogs(report, package, mustpass, fractionMustpass, gitSHA)
