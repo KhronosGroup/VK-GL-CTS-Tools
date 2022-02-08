@@ -113,7 +113,7 @@ def getPackageDescription (report, verification):
 						foundParams = True
 						args = shlex.split(line)
 						try:
-							args = [arg for arglist in args[2:] for arg in arglist.split()]
+							args = ['--deqp'+arg.rstrip() for arglist in args[2:] for arg in arglist.split('--deqp') if arg]
 							cmdArgs = verification.cmdParser.parse_args(args)
 							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
 									if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
