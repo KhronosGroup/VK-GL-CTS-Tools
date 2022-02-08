@@ -4,7 +4,7 @@
 # VK-GL-CTS Conformance Submission Verification
 # ---------------------------------------------
 #
-# Copyright 2020-2021 The Khronos Group Inc.
+# Copyright 2020-2022 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@
 #
 #-------------------------------------------------------------------------
 
+import argparse
 import shlex
 import xml.dom.minidom
 
@@ -186,3 +187,18 @@ class BatchResultParser:
 
 	def parseError (self, message):
 		raise ParseError(self.filename, self.curLine, message)
+
+class CommandLineParser(argparse.ArgumentParser):
+	def exit(self, status=0, message=None):
+		if message != None:
+			raise Exception(message)
+		raise Exception("invalid command line")
+
+	def error(self, message):
+		raise Exception(message)
+
+	def parse_args(self, args=None, namespace=None):
+		args, argv = self.parse_known_args(args, namespace)
+		if argv:
+			self.error("arguments not allowed for submission: %s" % (' '.join(argv)))
+		return args

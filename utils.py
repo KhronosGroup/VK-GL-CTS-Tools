@@ -4,7 +4,7 @@
 # VK-GL-CTS Conformance Submission Verification
 # ---------------------------------------------
 #
-# Copyright 2020-2021 The Khronos Group Inc.
+# Copyright 2020-2022 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,14 @@
 #-------------------------------------------------------------------------
 
 import os
+import pathlib
 import subprocess
 import sys
 import tarfile
 import tempfile
 
 from report import *
-from log_parser import StatusCode, BatchResultParser
+from log_parser import StatusCode, BatchResultParser, CommandLineParser
 
 ALLOWED_STATUS_CODES = set([
 		StatusCode.PASS,
@@ -107,6 +108,62 @@ class Mustpass:
 		else:
 			return False
 
+class CommandLineParserVk(CommandLineParser):
+
+	def parse_args(self, args=None, namespace=None):
+		args = super().parse_args(args, namespace)
+
+		if args.deqp_vk_device_id < 1:
+			raise Exception("--deqp-vk-device-id used invalid device id %d" % (args.deqp_vk_device_id))
+
+		if args.deqp_fraction[1] < 1 or args.deqp_fraction[1] > 8:
+			raise Exception("--deqp-fraction count %d was specified out of range [1..8]" % (args.deqp_fraction[1]))
+
+		if args.deqp_fraction[0] < 0 or args.deqp_fraction[0] >= args.deqp_fraction[1]:
+			raise Exception("--deqp-fraction index %d was specified out of range [0..%d]" % (args.deqp_fraction[0], args.deqp_fraction[1] - 1))
+
+		if args.deqp_fraction[1] > 1 and args.deqp_fraction_mandatory_caselist_file == None:
+			raise Exception("fractional run specified without mandatory caselist file")
+
+		return args
+
+	def __init__(self, api):
+		super(CommandLineParser, self).__init__(add_help=False, allow_abbrev=False)
+		self.api = api
+
+		#Common Args
+		self.add_argument("--deqp-caselist-file",						type=pathlib.Path,				required=True)
+		self.add_argument("--deqp-log-images",							choices=["disable"],			required=True)
+		self.add_argument("--deqp-log-shader-sources",					choices=["disable"],			required=True)
+		self.add_argument("--deqp-vk-device-id",						type=int,						default=1)
+		self.add_argument("--deqp-log-flush",							choices=["enable", "disable"],	default="enable")
+		self.add_argument("--deqp-log-filename",						type=pathlib.Path,				default=pathlib.Path("TestResults.qpa"))
+		self.add_argument("--deqp-archive-dir",							type=pathlib.Path,				default=pathlib.Path("."))
+		self.add_argument("--deqp-shadercache-filename",				type=pathlib.Path,				default=pathlib.Path("shadercache.bin"))
+		self.add_argument("--deqp-shadercache",							choices=["enable", "disable"],	default="enable")
+		self.add_argument("--deqp-fraction",							type=int, nargs=2,				default=[0, 1])
+		self.add_argument("--deqp-fraction-mandatory-caselist-file",	type=pathlib.Path,				default=None)
+		self.add_argument("--deqp-waiver-file",							type=pathlib.Path,				default=None)
+		self.add_argument("--deqp-log-decompiled-spirv",				choices=["enable", "disable"],	default="enable")
+		self.add_argument("--deqp-log-empty-loginfo",					choices=["enable", "disable"],	default="enable")
+
+		# VKSC args
+		if self.api == "VKSC":
+			self.add_argument("--deqp-command-buffer-min-size",	type=int,						default=0)
+			self.add_argument("--deqp-command-pool-min-size",	type=int,						default=0)
+			self.add_argument("--deqp-command-default-size",	type=int,						default=256)
+			self.add_argument("--deqp-pipeline-default-size",	type=int,						default=16384)
+			self.add_argument("--deqp-pipeline-compiler",		type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-pipeline-dir",			type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-pipeline-args",											default="")
+			self.add_argument("--deqp-pipeline-file",			type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-pipeline-logfile",		type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-pipeline-prefix",			type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-server-address",											default=None)
+			self.add_argument("--deqp-subprocess-test-count",	type=int,						default=65536)
+			self.add_argument("--deqp-subprocess-cfg-file",		type=pathlib.Path,				default=None)
+			self.add_argument("--deqp-subprocess",				choices=["enable", "disable"],	default="disable")
+
 class Verification:
 	def __init__(self, packagePath, ctsPath, api, version, releaseTag):
 		self.packagePath	= packagePath
@@ -114,6 +171,13 @@ class Verification:
 		self.api			= api
 		self.version		= version
 		self.releaseTag		= releaseTag
+		self.cmdParser		= self._getCommandParser()
+
+	def _getCommandParser(self):
+		parser = None
+		if self.api == "VK" or self.api == "VKSC":
+			parser = CommandLineParserVk(self.api)
+		return parser
 
 def beginsWith (str, prefix):
 	return str[:len(prefix)] == prefix

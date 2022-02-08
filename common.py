@@ -4,7 +4,7 @@
 # VK-GL-CTS Conformance Submission Verification
 # ---------------------------------------------
 #
-# Copyright 2020-2021 The Khronos Group Inc.
+# Copyright 2020-2022 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -403,7 +403,7 @@ def verify (report, verification):
 	if res == False:
 		return
 	releaseTagStr	= verification.releaseTag
-	package			= getPackageDescription(report, verification.packagePath)
+	package			= getPackageDescription(report, verification)
 	releaseLog		= getReleaseLog(report, verification.ctsPath, releaseTagStr)
 	gitSHA			= getGitCommitFromLog(package)
 

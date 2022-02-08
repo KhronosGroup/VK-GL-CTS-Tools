@@ -4,7 +4,7 @@
 # VK-GL-CTS Conformance Submission Verification
 # ---------------------------------------------
 #
-# Copyright 2020-2021 The Khronos Group Inc.
+# Copyright 2020-2022 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@
 import os
 from fnmatch import fnmatch
 import re
+import shlex
 from report import *
 from utils import *
 
@@ -33,7 +34,7 @@ GIT_STATUS_PATTERN	= "*git-status.txt"
 GIT_LOG_PATTERN		= "*git-log.txt"
 PATCH_PATTERN		= "*.patch"
 SUMMARY_PATTERN		= "cts-run-summary.xml"
-FRACTION_REGEX		= ".*[0-9]-of-[0-9].qpa"
+FRACTION_REGEX		= ".*([0-9])-of-([0-9]).qpa"
 
 class PackageDescription:
 	def __init__ (self, basePath, statement,
@@ -53,8 +54,8 @@ class PackageDescription:
 		self.conformProduct	= product
 		self.conformCpu		= cpu
 
-def getPackageDescription (report, packagePath):
-	allItems		= os.listdir(packagePath)
+def getPackageDescription (report, verification):
+	allItems		= os.listdir(verification.packagePath)
 	statement		= None
 	testLogs		= []
 	gitStatus		= []
@@ -92,7 +93,7 @@ def getPackageDescription (report, packagePath):
 	if isFraction:
 		for log in testLogs:
 			if reobj.match(log) == None:
-				report.failure("The package contains at least one test log file generated using --deqp-fraction option. All test log files in the package must be generated using that option. Test log file %s doesn't follow this requirement." % (log))
+				report.failure("Test log name does not conform to --deqp-fraction option", log)
 	for log in testLogs:
 		prefix = re.split("(\d-of-\d)+", log)[0]
 		if prefix in testLogsFraction:
@@ -103,10 +104,38 @@ def getPackageDescription (report, packagePath):
 
 		fractionLogs.append(log)
 
+		if verification.cmdParser != None:
+			with open(os.path.join(verification.packagePath, log), "r") as logf:
+				# Bypass log parser for speed, just need to get the commandline
+				foundParams = False
+				for line in logf.readlines():
+					if "#sessionInfo commandLineParameters" in line:
+						foundParams = True
+						args = shlex.split(line)
+						try:
+							args = [arg for arglist in args[2:] for arg in arglist.split()]
+							cmdArgs = verification.cmdParser.parse_args(args)
+							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
+									if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
+										otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
+									else:
+										raise Exception("subprocess cfg file specified but is not present in submission package")
+							if isFraction:
+								m = reobj.match(log)
+								index = int(m.group(1))
+								count = int(m.group(2))
+								if index != cmdArgs.deqp_fraction[0] and index != cmdArgs.deqp_fraction[1]:
+									raise Exception("fractional args %d,%d don't match test log name" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1]))
+						except Exception as e:
+							report.failure("Failure when parsing command line arguments \"%s\": %s" % (' '.join(args), str(e)), log)
+						break
+				if not foundParams:
+					report.failure("Could not find commandLineParameters", log)
+
 	for key, filesList in testLogsFraction.items():
 		filesList.sort()
 
-	return PackageDescription(packagePath, statement, testLogsFraction,
+	return PackageDescription(verification.packagePath, statement, testLogsFraction,
 							  gitStatus, gitLog, patches,
 							  summary, conformVersion, conformOs,
 							  conformProduct, conformCpu, otherItems)
