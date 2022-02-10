@@ -111,10 +111,14 @@ def getPackageDescription (report, verification):
 				for line in logf.readlines():
 					if "#sessionInfo commandLineParameters" in line:
 						foundParams = True
-						args = shlex.split(line)
+						args = ' '.join(shlex.split(line)[2:])
 						try:
-							args = ['--deqp'+arg.rstrip() for arglist in args[2:] for arg in arglist.split('--deqp') if arg]
-							cmdArgs = verification.cmdParser.parse_args(args)
+							tempArgs   = re.split('(--deqp)', args)
+							parsedArgs = []
+							for i, tmpArg in enumerate(tempArgs):
+								if tmpArg.strip() == "--deqp":
+									parsedArgs.append("--deqp" + tempArgs[i+1].strip())
+							cmdArgs = verification.cmdParser.parse_args(parsedArgs)
 							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
 									if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
 										otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
@@ -127,7 +131,7 @@ def getPackageDescription (report, verification):
 								if index != cmdArgs.deqp_fraction[0] and index != cmdArgs.deqp_fraction[1]:
 									raise Exception("fractional args %d,%d don't match test log name" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1]))
 						except Exception as e:
-							report.failure("Failure when parsing command line arguments \"%s\": %s" % (' '.join(args), str(e)), log)
+							report.failure("Failure when parsing command line arguments \"%s\": %s" % (args, str(e)), log)
 						break
 				if not foundParams:
 					report.failure("Could not find commandLineParameters", log)

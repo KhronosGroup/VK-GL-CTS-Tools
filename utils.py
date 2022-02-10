@@ -116,6 +116,8 @@ class CommandLineParserVk(CommandLineParser):
 		if args.deqp_vk_device_id < 1:
 			raise Exception("--deqp-vk-device-id used invalid device id %d" % (args.deqp_vk_device_id))
 
+		args.deqp_fraction = list(map(int, args.deqp_fraction.split(",")))
+
 		if args.deqp_fraction[1] < 1 or args.deqp_fraction[1] > 8:
 			raise Exception("--deqp-fraction count %d was specified out of range [1..8]" % (args.deqp_fraction[1]))
 
@@ -141,7 +143,7 @@ class CommandLineParserVk(CommandLineParser):
 		self.add_argument("--deqp-archive-dir",							type=pathlib.Path,				default=pathlib.Path("."))
 		self.add_argument("--deqp-shadercache-filename",				type=pathlib.Path,				default=pathlib.Path("shadercache.bin"))
 		self.add_argument("--deqp-shadercache",							choices=["enable", "disable"],	default="enable")
-		self.add_argument("--deqp-fraction",							type=int, nargs=2,				default=[0, 1])
+		self.add_argument("--deqp-fraction",															default="0,1")
 		self.add_argument("--deqp-fraction-mandatory-caselist-file",	type=pathlib.Path,				default=None)
 		self.add_argument("--deqp-waiver-file",							type=pathlib.Path,				default=None)
 		self.add_argument("--deqp-log-decompiled-spirv",				choices=["enable", "disable"],	default="enable")
