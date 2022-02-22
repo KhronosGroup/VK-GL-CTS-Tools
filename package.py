@@ -54,6 +54,16 @@ class PackageDescription:
 		self.conformProduct	= product
 		self.conformCpu		= cpu
 
+def parseCmds(parser, args):
+	tempArgs   = re.split('(--deqp)', args)
+	parsedArgs = []
+	for i, tmpArg in enumerate(tempArgs):
+		if tmpArg.strip() == "--deqp":
+			arg = "--deqp" + tempArgs[i+1].strip()
+			arg = arg.split() if "=" not in arg else [arg]
+			parsedArgs.extend(arg)
+	return parser.parse_args(parsedArgs)
+
 def getPackageDescription (report, verification):
 	allItems		= os.listdir(verification.packagePath)
 	statement		= None
@@ -111,19 +121,13 @@ def getPackageDescription (report, verification):
 				for line in logf.readlines():
 					if "#sessionInfo commandLineParameters" in line:
 						foundParams = True
-						args = ' '.join(shlex.split(line)[2:])
 						try:
-							tempArgs   = re.split('(--deqp)', args)
-							parsedArgs = []
-							for i, tmpArg in enumerate(tempArgs):
-								if tmpArg.strip() == "--deqp":
-									parsedArgs.append("--deqp" + tempArgs[i+1].strip())
-							cmdArgs = verification.cmdParser.parse_args(parsedArgs)
+							cmdArgs = parseCmds(verification.cmdParser, ' '.join(shlex.split(line)[2:]))
 							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
-									if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
-										otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
-									else:
-										raise Exception("subprocess cfg file specified but is not present in submission package")
+								if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
+									otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
+								else:
+									raise Exception("subprocess cfg file specified but is not present in submission package")
 							if isFraction:
 								m = reobj.match(log)
 								index = int(m.group(1))
