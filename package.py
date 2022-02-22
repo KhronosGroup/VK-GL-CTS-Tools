@@ -120,9 +120,10 @@ def getPackageDescription (report, verification):
 				foundParams = False
 				for line in logf.readlines():
 					if "#sessionInfo commandLineParameters" in line:
+						args = ' '.join(shlex.split(line)[2:])
 						foundParams = True
 						try:
-							cmdArgs = parseCmds(verification.cmdParser, ' '.join(shlex.split(line)[2:]))
+							cmdArgs = parseCmds(verification.cmdParser, args)
 							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
 								if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
 									otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
@@ -132,8 +133,8 @@ def getPackageDescription (report, verification):
 								m = reobj.match(log)
 								index = int(m.group(1))
 								count = int(m.group(2))
-								if index != cmdArgs.deqp_fraction[0] and index != cmdArgs.deqp_fraction[1]:
-									raise Exception("fractional args %d,%d don't match test log name" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1]))
+								if index != (cmdArgs.deqp_fraction[0] + 1) and count != cmdArgs.deqp_fraction[1]:
+									raise Exception("fractional args %d,%d doesn't match test log name" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1]))
 						except Exception as e:
 							report.failure("Failure when parsing command line arguments \"%s\": %s" % (args, str(e)), log)
 						break
