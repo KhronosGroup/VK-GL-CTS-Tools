@@ -28,9 +28,9 @@ from utils import *
 from report import *
 from log_parser import StatusCode, BatchResultParser
 
-def getMustpassDir(api, releaseTagStr):
+def getMustpassDir(mustpassBaseDir, api, releaseTagStr):
 
-	mustpassDir = 'master'
+	mustpassDir = 'main' if os.path.isdir(os.path.join(mustpassBaseDir, 'main')) else 'master'
 	matchFound = False
 	for r in NOT_MASTER_DIR:
 		if re.match(r, releaseTagStr):
@@ -59,12 +59,13 @@ def getMustpass (report, api, ctsPath, releaseTagStr):
 	report.message("Fetching mustpass for %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
 
-	mustpassDir	= getMustpassDir(api, releaseTagStr)
+	mustpassBaseDir = os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass')
+	mustpassDir	= getMustpassDir(mustpassBaseDir, api, releaseTagStr)
 	mustpassName	= getMustpassName(api)
-	mustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, mustpassName)
+	mustpassPath	= os.path.join(mustpassBaseDir, mustpassDir, mustpassName)
 	mustpass	= Mustpass(mustpassPath)
 
-	fractionMustpassPath	= os.path.join(ctsPath, 'external', 'vulkancts', 'mustpass', mustpassDir, 'vk-fraction-mandatory-tests.txt')
+	fractionMustpassPath	= os.path.join(mustpassBaseDir, mustpassDir, 'vk-fraction-mandatory-tests.txt')
 	fractionMustpass = None
 	if os.path.isfile(fractionMustpassPath):
 		fractionMustpass = Mustpass(fractionMustpassPath)
