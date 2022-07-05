@@ -30,7 +30,7 @@ from log_parser import StatusCode, BatchResultParser
 
 def getMustpassDir(api, releaseTagStr):
 
-	mustpassDir = 'master'
+	mustpassDir = 'main'
 	matchFound = False
 	for r in NOT_MASTER_DIR:
 		if re.match(r, releaseTagStr):
