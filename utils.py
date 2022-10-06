@@ -315,8 +315,8 @@ def applyPatch(report, patch):
 		success = True
 	return success
 
-def readTestLog (filename):
-	parser = BatchResultParser()
+def readTestLog (report, filename):
+	parser = BatchResultParser(report)
 	return parser.parseFile(filename)
 
 def verifyFileIntegrity(report, filename, info, gitSHA):
@@ -427,7 +427,7 @@ def verifyTestLog (report, package, mustpass, fractionMustpass, gitSHA):
 		for testLogFile in filesList:
 			filename = os.path.join(package.basePath, testLogFile)
 			report.message("Reading results.", filename)
-			results, info	= readTestLog(filename)
+			results, info	= readTestLog(report, filename)
 			anyError |= verifyFileIntegrity(report, filename, info, gitSHA)
 
 			if isFractionResults:
@@ -468,7 +468,7 @@ def verifyTestLogES (report, filename, mustpass, gitSHA):
 	assert len(mustpass.cases) == len(set(mustpass.cases))
 
 	report.message("Reading results.", filename)
-	results, info	= readTestLog(filename)
+	results, info	= readTestLog(report, filename)
 	anyError		= False
 	resultOrderOk	= True
 
