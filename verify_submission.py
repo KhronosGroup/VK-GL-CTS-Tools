@@ -113,4 +113,5 @@ if __name__ == "__main__":
 				else:
 					report.warning("Not supported type of submission: %s" % apiName, packageFileBN)
 
-	report.generate()
+	fails, warnings = report.generate()
+	sys.exit(0 if fails == 0 else 1)
