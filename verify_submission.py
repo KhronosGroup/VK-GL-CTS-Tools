@@ -70,7 +70,7 @@ if __name__ == "__main__":
 	ctsPath			= validateSource(args.source)
 	report			= Report(args.verbose, args.output)
 
-	packageFile		= os.path.normpath(sys.argv[1])
+	packageFile		= os.path.normpath(args.package)
 	packagePath		= args.untarDir
 	packageFileBN	= os.path.basename(packageFile)
 
