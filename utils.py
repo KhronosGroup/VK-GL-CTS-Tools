@@ -339,7 +339,7 @@ def verifyFileIntegrity(report, filename, info, gitSHA):
 			hashDigits = sha1.split('-')[-1][1:]
 		else:
 			hashDigits = sha1
-		if gitSHA.startswith(hashDigits)
+		if gitSHA.startswith(hashDigits):
 			report.passed("Test log %s matches the HEAD commit from git log: %s" % (releaseNameKey, gitSHA))
 		else:
 			anyError |= True
