@@ -329,7 +329,17 @@ def verifyFileIntegrity(report, filename, info, gitSHA):
 		report.failure("Test log is missing %s" % releaseNameKey)
 	else:
 		sha1 = info[releaseNameKey]
-		if sha1 == 'git-' + gitSHA:
+		hashDigits = ''
+		if sha1.startswith('git-'):
+			# Keep whatever comes after "git-", containing the git hash.
+			hashDigits = sha1[4:]
+		elif '-' in sha1:
+			# It may be something like vulkan-cts-1.3.6.0-0-g6ca63e81c
+			# We have to extract "6ca63e81c" (note we skip the g)
+			hashDigits = sha1.split('-')[-1][1:]
+		else:
+			hashDigits = sha1
+		if gitSHA.startswith(hashDigits):
 			report.passed("Test log %s matches the HEAD commit from git log: %s" % (releaseNameKey, gitSHA))
 		else:
 			anyError |= True
