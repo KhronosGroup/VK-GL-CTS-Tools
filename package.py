@@ -34,7 +34,7 @@ GIT_STATUS_PATTERN	= "*git-status.txt"
 GIT_LOG_PATTERN		= "*git-log.txt"
 PATCH_PATTERN		= "*.patch"
 SUMMARY_PATTERN		= "cts-run-summary.xml"
-FRACTION_REGEX		= ".*([0-9])-of-([0-9]).qpa"
+FRACTION_REGEX		= ".*([0-9]+)-of-([0-9]+).qpa"
 
 class PackageDescription:
 	def __init__ (self, basePath, statement,
