@@ -24,6 +24,7 @@
 import argparse
 import shlex
 import xml.dom.minidom
+import re
 
 class StatusCode:
 	PASS					= 'Pass'
@@ -121,8 +122,23 @@ class BatchResultParser:
 	def parseLine (self, line):
 		if len(line) > 0 and line[0] == '#':
 			self.parseContainerLine(line)
-		elif self.curResultText != None:
-			self.curResultText += line
+		else:
+			if len(line) > 0 and line.startswith("<TestCaseResult"):
+				pattern = r'CasePath=\"([^\"]+)\"'
+				match = re.search(pattern, line)
+				if not match or self.curCaseName != None:
+					self.parseError("Invalid <TestCaseResult...\n" + line + "\n")
+				self.curCaseName	= match.group(1)
+				self.curResultText = line
+			elif len(line) > 0 and line.startswith("</TestCaseResult>"):
+				if self.curCaseName == None:
+					self.parseError("Invalid </TestCaseResult>")
+				self.curResultText += line
+				self.parseTestCaseResult(self.curCaseName, self.curResultText)
+				self.curCaseName	= None
+				self.curResultText	= None
+			elif self.curResultText != None:
+				self.curResultText += line
 
 	def parseContainerLine (self, line):
 		args = splitContainerLine(line)
@@ -134,34 +150,11 @@ class BatchResultParser:
 		elif args[0] == "#beginSession" or args[0] == "#endSession":
 			pass
 		elif args[0] == "#beginTestCaseResult":
-			if len(args) != 2 or self.curCaseName != None:
-				self.parseError("Invalid #beginTestCaseResult")
-			self.curCaseName	= args[1]
-			self.curResultText	= ""
+			pass # Superseded by XML
 		elif args[0] == "#endTestCaseResult":
-			if len(args) != 1 or self.curCaseName == None:
-				self.parseError("Invalid #endTestCaseResult")
-			self.parseTestCaseResult(self.curCaseName, self.curResultText)
-			self.curCaseName	= None
-			self.curResultText	= None
+			pass # Superseded by XML
 		elif args[0] == "#terminateTestCaseResult":
-			if len(args) < 2 or self.curCaseName == None:
-				self.parseError("Invalid #terminateTestCaseResult")
-			statusCode		= ' '.join(args[1:])
-			statusDetails	= statusCode
-
-			if not StatusCode.isValid(statusCode):
-				# Legacy format
-				if statusCode == "Watchdog timeout occurred.":
-					statusCode = StatusCode.TIMEOUT
-				else:
-					statusCode = StatusCode.CRASH
-
-			# Do not try to parse at all since XML is likely broken
-			self.testCaseResults.append(TestCaseResult(self.curCaseName, statusCode, statusDetails, self.curResultText))
-
-			self.curCaseName	= None
-			self.curResultText	= None
+			pass # Superseded by XML
 		else:
 			# Assume this is result text
 			if self.curResultText != None:
