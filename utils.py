@@ -193,7 +193,7 @@ def beginsWith (str, prefix):
 	return str[:len(prefix)] == prefix
 
 def readFile (filename):
-	f = open(filename, 'rbU')
+	f = open(filename, 'rb')
 	data = f.read()
 	f.close()
 	return data
