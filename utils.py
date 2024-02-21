@@ -43,7 +43,7 @@ ALLOWED_STATUS_CODES = set([
 SUPPORTED_RELEASES	= ['vulkan-cts-[0-9]\.[0-9]\.[0-9]*\.[0-9]*',
 					   'vulkansc-cts-1\.0\.[0-9]*\.[0-9]*',
 					   'opengl-cts-4\.6\.[0-9]*\.[0-9]*',
-					   'opengl-es-cts-3\.2\.[2-9]*\.[0-9]*']
+					   'opengl-es-cts-3\.2\.([2-9]|[1-9][0-9]+)\.[0-9]*']
 WITHDRAWN_RELEASES	= ['vulkan-cts-1\.0\.0\.[0-9]*',
 				'vulkan-cts-1\.0\.1\.[0-9]*',
 				'vulkan-cts-1\.0\.2\.[0-9]*',
