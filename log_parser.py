@@ -23,6 +23,7 @@
 
 import argparse
 import shlex
+import time
 import xml.dom.minidom
 import re
 
@@ -91,8 +92,9 @@ def getNodeText (node):
 	return ''.join(rc)
 
 class BatchResultParser:
-	def __init__ (self):
-		pass
+	def __init__ (self, report):
+		self.report = report
+		self.lastStatusPrint = time.time()
 
 	def parseFile (self, filename):
 		self.init(filename)
@@ -177,6 +179,10 @@ class BatchResultParser:
 			statusDetails	= "XML parsing failed: %s" % str(e)
 
 		self.testCaseResults.append(TestCaseResult(name, statusCode, statusDetails, log))
+		now = time.time()
+		if now - self.lastStatusPrint > 60:
+			self.lastStatusPrint = now
+			self.report.message('Still reading results (%u so far)' % len(self.testCaseResults))
 
 	def parseError (self, message):
 		raise ParseError(self.filename, self.curLine, message)

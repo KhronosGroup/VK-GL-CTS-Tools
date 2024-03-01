@@ -75,7 +75,7 @@ def compareConfigs(report, filename, baseConfigs, cmpConfigs):
 def verifyConfigFile (report, filename, type):
 	caseNames = getConfigCaseName(type)
 
-	parser					= BatchResultParser()
+	parser					= BatchResultParser(report)
 	results, sessionInfo	= parser.parseFile(filename)
 	baseConfigs				= None
 
