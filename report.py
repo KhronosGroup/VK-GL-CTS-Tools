@@ -201,4 +201,4 @@ class Report:
 			print(passMsg)
 		print('\n' + '=' * 54)
 
-		return
+		return fails, warnings
