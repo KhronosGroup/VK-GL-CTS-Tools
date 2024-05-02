@@ -200,9 +200,29 @@ def verifyTestLogs(report, package, gitSHA, ctsPath):
 	verifyConfigFile(report, os.path.join(package.basePath, summary.configLogFilename), summary.type)
 
 	mustpassCases = {}
+
+	# es mustpass files are stored under one of the below two directories, based on if the branch as applied a folder structure change
+	# external/openglcts/data/mustpass
+	# external/openglcts/data/gl_cts/data/mustpass
+	# Get the mustpass file search path based on which folder structure the branch has
+
+	mustpassFileSearchPath = "openglcts"
+	# First find all immediate sub directories of external/openglcts/data
+	openglctsDataPath = os.path.join(ctsPath, "external", "openglcts", "data")
+	openglctsDataChildPath = []
+	for childPath in os.listdir(openglctsDataPath):
+		if (os.path.isdir(os.path.join(openglctsDataPath, childPath))):
+			openglctsDataChildPath.append(childPath)
+	# Check if there is a single gl_cts subdirectory, use the new directory structure openglcts/data/gl_cts as the search path for mustpass files
+	if len(openglctsDataChildPath) == 1:
+		if openglctsDataChildPath[0] == "gl_cts":
+			mustpassFileSearchPath = "openglcts/data/gl_cts"
+		else:
+			report.failure("If there is only a single subdirectory under external/openglcts/data, its' name should be gl_cts")
+
 	# Verify that all run files passed
 	for runLog in summary.runLogAndCaselist:
-		mustpassFile = os.path.join(ctsPath, "external", "openglcts", summary.runLogAndCaselist[runLog])
+		mustpassFile = os.path.join(ctsPath, "external", mustpassFileSearchPath, summary.runLogAndCaselist[runLog])
 		key = os.path.dirname(mustpassFile)
 		if key in mustpassCases:
 			mpCase = mustpassCases[key]
