@@ -189,7 +189,7 @@ def verifyTestLogs(report, package, gitSHA, ctsPath):
 	if package.summary == None:
 		report.failure("The package is missing cts-run-summary.xml")
 		return
-	summary	= parseRunSummary(os.path.join(package.basePath, package.summary))
+	summary	= parseRunSummary(report, os.path.join(package.basePath, package.summary))
 	mustpassDirs = []
 
 	# Check Conformant attribute

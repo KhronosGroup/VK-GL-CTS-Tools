@@ -22,6 +22,7 @@
 #-------------------------------------------------------------------------
 
 import xml.dom.minidom
+from report import *
 
 class TestRunSummary:
 	def __init__ (self, type, isConformant, configLogFilename, runLogFilenames, runLogAndCaselist):
@@ -31,14 +32,19 @@ class TestRunSummary:
 		self.runLogFilenames	= runLogFilenames
 		self.runLogAndCaselist	= runLogAndCaselist
 
-def parseRunSummary (filename):
+def parseRunSummary (report, filename):
 	doc = xml.dom.minidom.parse(filename)
 	summary = doc.documentElement
 	if summary.localName != "Summary":
 		raise Exception("Document element is not <Summmary>")
 
 	type			= summary.getAttributeNode("Type").nodeValue
-	isConformant	= summary.getAttributeNode("Conformant").nodeValue == "True"
+	conformantNode	= summary.getAttributeNode("Conformant")
+	isConformant	= True
+	if conformantNode:
+		isConformant	= conformantNode.nodeValue == "True"
+	else:
+		report.warning("Conformant attr not found")
 
 	configRuns		= doc.getElementsByTagName("Configs")
 	if len(configRuns) != 1:
