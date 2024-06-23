@@ -67,7 +67,6 @@ def parseArgs ():
 
 if __name__ == "__main__":
 	args			= parseArgs()
-	ctsPath			= validateSource(args.source)
 	report			= Report(args.verbose, args.output)
 
 	packageFile		= os.path.normpath(args.package)
@@ -106,6 +105,7 @@ if __name__ == "__main__":
 			else:
 				apiName		= API_TYPE_DICT[apiType] + ' ' + apiVersion
 
+				ctsPath      = validateSource(args.source)
 				verification = Verification(packagePath, ctsPath, apiType, apiVersion, releaseTag)
 				if isSubmissionSupported(apiType):
 					report.message("Started verification for %s" % apiName, packageFileBN)
