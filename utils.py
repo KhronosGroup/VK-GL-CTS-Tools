@@ -129,8 +129,8 @@ class CommandLineParserVk(CommandLineParser):
 
 		args.deqp_fraction = list(map(int, args.deqp_fraction.split(",")))
 
-		if args.deqp_fraction[1] < 1 or args.deqp_fraction[1] > 8:
-			raise Exception("--deqp-fraction count %d was specified out of range [1..8]" % (args.deqp_fraction[1]))
+		if args.deqp_fraction[1] < 1 or args.deqp_fraction[1] > 16:
+			raise Exception("--deqp-fraction count %d was specified out of range [1..16]" % (args.deqp_fraction[1]))
 
 		if args.deqp_fraction[0] < 0 or args.deqp_fraction[0] >= args.deqp_fraction[1]:
 			raise Exception("--deqp-fraction index %d was specified out of range [0..%d]" % (args.deqp_fraction[0], args.deqp_fraction[1] - 1))
