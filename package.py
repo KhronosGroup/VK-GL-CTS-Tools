@@ -105,7 +105,7 @@ def getPackageDescription (report, verification):
 			if reobj.match(log) == None:
 				report.failure("Test log name does not conform to --deqp-fraction option", log)
 	for log in testLogs:
-		prefix = re.split("(\d-of-\d)+", log)[0]
+		prefix = re.split("(\d+-of-\d+)+", log)[0]
 		if prefix in testLogsFraction:
 			fractionLogs = testLogsFraction[prefix]
 		else:
