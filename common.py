@@ -83,8 +83,9 @@ def verifyReleaseTagAndApi(report, ctsPath, api, version, releaseTag):
 	return True
 
 def sanitizeReleaseLog(log):
-	slog = log.rstrip('\n')
-	return slog
+	log = log.replace('\r\n', '\n')
+	log = log.rstrip('\n')
+	return log
 
 def getReleaseLog (report, ctsPath, releaseTagStr):
 	releaseLog 		= [None, None]
