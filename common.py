@@ -82,17 +82,26 @@ def verifyReleaseTagAndApi(report, ctsPath, api, version, releaseTag):
 	report.message("Verifying against %s" % releaseTagStr)
 	return True
 
+def sanitizeReleaseLog(log):
+	log = log.replace('\r\n', '\n')
+	log = log.rstrip('\n')
+	return log
+
 def getReleaseLog (report, ctsPath, releaseTagStr):
 	releaseLog 		= [None, None]
 	report.message("Fetching HEAD commit of %s." % releaseTagStr)
+
 	pushWorkingDir(ctsPath)
 	checkoutReleaseTag(report, releaseTagStr)
-	releaseLog[0] = git('log', '-1', '--decorate=no', releaseTagStr)
+	gitlog = git('log', '-1', '--decorate=no', releaseTagStr)
+	releaseLog[0] = sanitizeReleaseLog(gitlog)
+
 	if isKCCTSRelease(releaseTagStr):
 		kcctsDir = os.path.join('external', 'kc-cts', 'src')
 		fetchSources(os.path.join('external', 'fetch_kc_cts.py'))
 		pushWorkingDir(kcctsDir)
-		releaseLog[1] = git('log', '-1', '--decorate=no', releaseTagStr)
+		gitlog = git('log', '-1', '--decorate=no', releaseTagStr)
+		releaseLog[1] = sanitizeReleaseLog(gitlog)
 		popWorkingDir()
 	popWorkingDir()
 
@@ -295,6 +304,7 @@ def sanitizePackageLog(log, report = None):
 	slog = slog.replace('\r\n', '\n')
 	slog = slog.replace('\t', '        ')
 	slog = re.sub(' \(.*(tag: .*)+\)', '', slog)
+	slog = slog.rstrip('\n')
 	return slog
 
 def isGitLogEmpty (package, releaseLog, gitLog, report = None):
