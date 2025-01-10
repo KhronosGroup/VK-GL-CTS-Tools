@@ -177,6 +177,7 @@ class CommandLineParserVk(CommandLineParser):
 			self.add_argument("--deqp-subprocess-test-count",	type=int,						default=65536)
 			self.add_argument("--deqp-subprocess-cfg-file",		type=pathlib.Path,				default=None)
 			self.add_argument("--deqp-subprocess",				choices=["enable", "disable"],	default="disable")
+			self.add_argument("--deqp-vk-library-path",			type=pathlib.Path,				default=None)
 
 class Verification:
 	def __init__(self, packagePath, ctsPath, api, version, releaseTag):
