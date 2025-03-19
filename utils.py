@@ -81,7 +81,7 @@ NOT_MASTER_DIR		= ['vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
 API_TYPE_DICT		= {'VK' : 'Vulkan', 'VKSC' : 'Vulkan SC', 'GL' : 'OpenGL', 'ES' : 'OpenGL ES'}
 API_VERSION_REGEX	= ".*\-cts\-([0-9]+)\.([0-9]+)\..+"
 RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'VKSC' : 'vulkansc-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
-KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-9]*\.[0-9]*"]
+KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-5]*\.[0-9]*"]
 
 class Mustpass:
 	def __init__(self, filename):
