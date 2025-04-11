@@ -305,7 +305,7 @@ def validateSource(ctsPath):
 def checkoutReleaseTag(report, releaseTag):
 	success = False
 	try:
-		git('checkout', releaseTag)
+		git('checkout', f'tags/{releaseTag}')
 	except:
 		report.failure("Failed to checkout release tag %s" % releaseTag)
 	else:
