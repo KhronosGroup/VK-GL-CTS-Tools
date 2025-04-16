@@ -167,6 +167,8 @@ def verifyMustpassCases(report, package, mustpassCases, type):
 			pattern += "-width-" + cfgItems['width'] + "-height-" + cfgItems['height']
 			if cfgItems['seed'] != None:
 				pattern += "-seed-" + cfgItems['seed']
+			# Append an optional -egl or -wgl suffix (if present)
+			pattern += r"(-(?:egl|wgl))?"
 			pattern += ".qpa"
 			p = re.compile(pattern)
 			matches = [m for l in mustpassCases[mustpass] for m in (p.match(l),) if m]
