@@ -307,6 +307,33 @@ def sanitizePackageLog(log, report = None):
 	slog = slog.rstrip('\n')
 	return slog
 
+def normalizeWhitespace(text):
+	"""
+	Normalize whitespace in text to handle formatting differences between
+	release logs and package logs. This function:
+	1. Normalizes line endings
+	2. Normalizes multiple spaces/tabs to single spaces
+	3. Removes trailing whitespace from lines
+	4. Normalizes empty lines
+	"""
+	if not text:
+		return text
+
+	# Split into lines and normalize each line
+	lines = text.split('\n')
+	normalized_lines = []
+
+	for line in lines:
+		# Replace multiple whitespace characters with single space
+		normalized_line = ' '.join(line.split())
+		normalized_lines.append(normalized_line)
+
+	# Join lines back together, removing empty lines at the end
+	while normalized_lines and normalized_lines[-1] == '':
+		normalized_lines.pop()
+
+	return '\n'.join(normalized_lines)
+
 def isGitLogEmpty (package, releaseLog, gitLog, report = None):
 	logPath			= os.path.join(package.basePath, gitLog)
 	prisitineLog	= readFile(logPath)
@@ -316,9 +343,14 @@ def isGitLogEmpty (package, releaseLog, gitLog, report = None):
 		report.message("git log contains:", gitLog)
 		prisitineLog = prisitineLog.decode('utf-8', 'ignore')
 		report.fmtmessage(prisitineLog)
-	if log == releaseLog[0]:
+	# Normalize whitespace for comparison
+	normalized_log = normalizeWhitespace(log)
+	normalized_release_log_0 = normalizeWhitespace(releaseLog[0])
+	normalized_release_log_1 = normalizeWhitespace(releaseLog[1]) if releaseLog[1] is not None else None
+
+	if normalized_log == normalized_release_log_0:
 		return True
-	if releaseLog[1] != None and log == releaseLog[1]:
+	if normalized_release_log_1 is not None and normalized_log == normalized_release_log_1:
 		return True
 	return False
 
@@ -327,9 +359,14 @@ def isReleaseHeadInGitLog (report, package, releaseLog, gitLog):
 	log		= readFile(logPath)
 	log 	= sanitizePackageLog(log)
 
-	if releaseLog[0] in log:
+	# Normalize whitespace for comparison
+	normalized_log = normalizeWhitespace(log)
+	normalized_release_log_0 = normalizeWhitespace(releaseLog[0])
+	normalized_release_log_1 = normalizeWhitespace(releaseLog[1]) if releaseLog[1] is not None else None
+
+	if normalized_release_log_0 in normalized_log:
 		return True
-	if releaseLog[1] != None and releaseLog[1] in log:
+	if normalized_release_log_1 is not None and normalized_release_log_1 in normalized_log:
 		return True
 	return False
 
