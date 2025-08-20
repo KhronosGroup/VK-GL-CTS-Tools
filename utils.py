@@ -40,49 +40,49 @@ ALLOWED_STATUS_CODES = set([
 		StatusCode.WAIVER
 	])
 
-SUPPORTED_RELEASES	= ['vulkan-cts-[0-9]\.[0-9]\.[0-9]*\.[0-9]*',
-					   'vulkansc-cts-1\.0\.[0-9]*\.[0-9]*',
-					   'opengl-cts-4\.6\.[0-9]*\.[0-9]*',
-					   'opengl-es-cts-3\.2\.([2-9]|[1-9][0-9]+)\.[0-9]*']
-WITHDRAWN_RELEASES	= ['vulkan-cts-1\.0\.0\.[0-9]*',
-				'vulkan-cts-1\.0\.1\.[0-9]*',
-				'vulkan-cts-1\.0\.2\.[0-9]*',
-				'vulkan-cts-1\.1\.0\.[0-9]*',
-				'vulkan-cts-1\.1\.1\.[0-9]*',
-				'vulkan-cts-1\.1\.2\.[0-9]*',
-				'vulkan-cts-1\.1\.3\.[0-9]*',
-				'vulkan-cts-1\.1\.4\.[0-9]*',
-				'vulkan-cts-1\.1\.5\.[0-9]*',
-				'vulkan-cts-1\.1\.6\.[0-9]*',
-				'vulkan-cts-1\.2\.0\.[0-9]*',
-				'vulkan-cts-1\.2\.1\.[0-9]*',
-				'vulkan-cts-1\.2\.2\.[0-9]*',
-				'vulkan-cts-1\.2\.3\.[0-9]*',
-				'vulkan-cts-1\.2\.4\.[0-9]*',
-				'vulkan-cts-1\.2\.5\.[0-9]*',
-				'vulkan-cts-1\.2\.6\.[0-9]*',
-				'vulkan-cts-1\.2\.7\.[0-9]*',
-				'vulkan-cts-1\.2\.8\.[0-9]*',
-				'vulkan-cts-1\.3\.0\.[0-9]*',
-				'vulkan-cts-1\.3\.1\.[0-9]*',
-				'vulkan-cts-1\.3\.2\.[0-9]*',
-				'vulkan-cts-1\.3\.3\.[0-9]*',
-				'vulkan-cts-1\.3\.4\.[0-9]*',
-				'vulkan-cts-1\.3\.5\.[0-9]*',
-				'vulkan-cts-1\.3\.6\.[0-9]*',
-				'vulkan-cts-1\.3\.7\.[0-9]*',
-				'vulkansc-cts-1\.0\.0\.[0-9]*',
-				'vulkansc-cts-1\.0\.1\.[0-9]*']
-NOT_MASTER_DIR		= ['vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
-					   'vulkan-cts-1\.1\.0\.[0-9]*',
-					   'vulkan-cts-1\.1\.1\.[0-9]*',
-					   'vulkan-cts-1\.1\.2\.[0-9]*',
-					   'vulkan-cts-1\.1\.3\.[0-9]*',
-					   'vulkan-cts-1\.1\.4\.[0-9]*']
+SUPPORTED_RELEASES	= [r'vulkan-cts-[0-9]\.[0-9]\.[0-9]*\.[0-9]*',
+					   r'vulkansc-cts-1\.0\.[0-9]*\.[0-9]*',
+					   r'opengl-cts-4\.6\.[0-9]*\.[0-9]*',
+					   r'opengl-es-cts-3\.2\.([2-9]|[1-9][0-9]+)\.[0-9]*']
+WITHDRAWN_RELEASES	= [r'vulkan-cts-1\.0\.0\.[0-9]*',
+				r'vulkan-cts-1\.0\.1\.[0-9]*',
+				r'vulkan-cts-1\.0\.2\.[0-9]*',
+				r'vulkan-cts-1\.1\.0\.[0-9]*',
+				r'vulkan-cts-1\.1\.1\.[0-9]*',
+				r'vulkan-cts-1\.1\.2\.[0-9]*',
+				r'vulkan-cts-1\.1\.3\.[0-9]*',
+				r'vulkan-cts-1\.1\.4\.[0-9]*',
+				r'vulkan-cts-1\.1\.5\.[0-9]*',
+				r'vulkan-cts-1\.1\.6\.[0-9]*',
+				r'vulkan-cts-1\.2\.0\.[0-9]*',
+				r'vulkan-cts-1\.2\.1\.[0-9]*',
+				r'vulkan-cts-1\.2\.2\.[0-9]*',
+				r'vulkan-cts-1\.2\.3\.[0-9]*',
+				r'vulkan-cts-1\.2\.4\.[0-9]*',
+				r'vulkan-cts-1\.2\.5\.[0-9]*',
+				r'vulkan-cts-1\.2\.6\.[0-9]*',
+				r'vulkan-cts-1\.2\.7\.[0-9]*',
+				r'vulkan-cts-1\.2\.8\.[0-9]*',
+				r'vulkan-cts-1\.3\.0\.[0-9]*',
+				r'vulkan-cts-1\.3\.1\.[0-9]*',
+				r'vulkan-cts-1\.3\.2\.[0-9]*',
+				r'vulkan-cts-1\.3\.3\.[0-9]*',
+				r'vulkan-cts-1\.3\.4\.[0-9]*',
+				r'vulkan-cts-1\.3\.5\.[0-9]*',
+				r'vulkan-cts-1\.3\.6\.[0-9]*',
+				r'vulkan-cts-1\.3\.7\.[0-9]*',
+				r'vulkansc-cts-1\.0\.0\.[0-9]*',
+				r'vulkansc-cts-1\.0\.1\.[0-9]*']
+NOT_MASTER_DIR		= [r'vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
+					   r'vulkan-cts-1\.1\.0\.[0-9]*',
+					   r'vulkan-cts-1\.1\.1\.[0-9]*',
+					   r'vulkan-cts-1\.1\.2\.[0-9]*',
+					   r'vulkan-cts-1\.1\.3\.[0-9]*',
+					   r'vulkan-cts-1\.1\.4\.[0-9]*']
 API_TYPE_DICT		= {'VK' : 'Vulkan', 'VKSC' : 'Vulkan SC', 'GL' : 'OpenGL', 'ES' : 'OpenGL ES'}
-API_VERSION_REGEX	= ".*\-cts\-([0-9]+)\.([0-9]+)\..+"
+API_VERSION_REGEX	= r".*\-cts\-([0-9]+)\.([0-9]+)\..+"
 RELEASE_TAG_DICT	= {'VK' : 'vulkan-cts', 'VKSC' : 'vulkansc-cts', 'ES' : 'opengl-es-cts', 'GL' : 'opengl-cts'}
-KC_CTS_RELEASE		= ["opengl-es-cts-3\.2\.[2-3]\.[0-9]*", "opengl-cts-4\.6\.[0-5]*\.[0-9]*"]
+KC_CTS_RELEASE		= [r"opengl-es-cts-3\.2\.[2-3]\.[0-9]*", r"opengl-cts-4\.6\.[0-5]*\.[0-9]*"]
 
 class Mustpass:
 	def __init__(self, filename):

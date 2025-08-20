@@ -303,7 +303,7 @@ def sanitizePackageLog(log, report = None):
 	slog = log.decode('utf-8', 'ignore')
 	slog = slog.replace('\r\n', '\n')
 	slog = slog.replace('\t', '        ')
-	slog = re.sub(' \(.*(tag: .*)+\)', '', slog)
+	slog = re.sub(r' \(.*(tag: .*)+\)', '', slog)
 	slog = slog.rstrip('\n')
 	return slog
 
