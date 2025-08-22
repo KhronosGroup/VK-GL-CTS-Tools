@@ -25,6 +25,7 @@ import os
 import re
 import sys
 import argparse
+import tempfile
 
 from package import *
 from report import *
@@ -102,7 +103,7 @@ if __name__ == "__main__":
 				apiType = "Invalid"
 
 			if apiType not in API_TYPE_DICT:
-				report.failure("Incorrect package name: %s. The file should be named as \<API\>\<API version\>_\<Adopter\>_\<Info\>.tgz. See the README for more info." % packageFileBN)
+				report.failure("Incorrect package name: %s. The file should be named as <API><API version>_<Adopter>_<Info>.tgz. See the README for more info." % packageFileBN)
 			else:
 				apiName		= API_TYPE_DICT[apiType] + ' ' + apiVersion
 
