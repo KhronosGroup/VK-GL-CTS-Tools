@@ -93,7 +93,7 @@ def getReleaseLog (report, ctsPath, releaseTagStr):
 
 	pushWorkingDir(ctsPath)
 	checkoutReleaseTag(report, releaseTagStr)
-	gitlog = git('log', '-1', '--decorate=no', releaseTagStr)
+	gitlog = git('log', '-1', '--decorate=no', '--abbrev=12', releaseTagStr)
 	releaseLog[0] = sanitizeReleaseLog(gitlog)
 
 	if isKCCTSRelease(releaseTagStr):
@@ -307,6 +307,22 @@ def sanitizePackageLog(log, report = None):
 	slog = slog.rstrip('\n')
 	return slog
 
+MERGE_LINE_RE = re.compile(r'^Merge:\s+([0-9a-fA-F]+)\s+([0-9a-fA-F]+)$')
+
+def normalizeMergeLine(line):
+    """
+    Normalize 'Merge:' lines by truncating each commit hash to 8 characters.
+    Example:
+      'Merge: d822ba6124fb 4ccd715fb1e4'
+    → 'Merge: d822ba61 4ccd715f'
+    """
+    match = MERGE_LINE_RE.match(line.strip())
+    if match:
+        short1 = match.group(1)[:8]
+        short2 = match.group(2)[:8]
+        return f"Merge: {short1} {short2}"
+    return line
+
 def normalizeWhitespace(text):
 	"""
 	Normalize whitespace in text to handle formatting differences between
@@ -326,6 +342,7 @@ def normalizeWhitespace(text):
 	for line in lines:
 		# Replace multiple whitespace characters with single space
 		normalized_line = ' '.join(line.split())
+		normalized_line = normalizeMergeLine(normalized_line)
 		normalized_lines.append(normalized_line)
 
 	# Join lines back together, removing empty lines at the end
