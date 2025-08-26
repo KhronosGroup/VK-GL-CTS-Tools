@@ -364,6 +364,10 @@ def isReleaseHeadInGitLog (report, package, releaseLog, gitLog):
 	normalized_release_log_0 = normalizeWhitespace(releaseLog[0])
 	normalized_release_log_1 = normalizeWhitespace(releaseLog[1]) if releaseLog[1] is not None else None
 
+	report.verbose("normalized_log is:\n%s" % (normalized_log))
+	report.verbose("normalized_release_log_0 is:\n%s" % (normalized_release_log_0))
+	report.verbose("normalized_release_log_1 is:\n%s" % (normalized_release_log_1))
+
 	if normalized_release_log_0 in normalized_log:
 		return True
 	if normalized_release_log_1 is not None and normalized_release_log_1 in normalized_log:
@@ -373,6 +377,7 @@ def isReleaseHeadInGitLog (report, package, releaseLog, gitLog):
 def verifyGitLog (report, package, releaseLog):
 	anyError = False
 	anyWarn = False
+
 	if len(package.gitLog) > 0:
 		for log, path in package.gitLog:
 			if isReleaseHeadInGitLog (report, package, releaseLog, log):
