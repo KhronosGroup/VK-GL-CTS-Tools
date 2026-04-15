@@ -73,6 +73,7 @@ WITHDRAWN_RELEASES	= [r'vulkan-cts-1\.0\.0\.[0-9]*',
 				r'vulkan-cts-1\.3\.7\.[0-9]*',
 				r'vulkan-cts-1\.3\.8\.[0-9]*',
 				r'vulkan-cts-1\.3\.9\.[0-9]*',
+				r'vulkan-cts-1\.4\.0\.[0-9]*',
 				r'vulkansc-cts-1\.0\.0\.[0-9]*',
 				r'vulkansc-cts-1\.0\.1\.[0-9]*']
 NOT_MASTER_DIR		= [r'vulkan-cts-1\.0\.[0-9]*\.[0-9]*',
