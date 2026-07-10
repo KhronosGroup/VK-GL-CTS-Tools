@@ -134,8 +134,13 @@ def verifyMustpassCases(report, package, mustpassCases, type):
 			for config in configs:
 				caseListFile = config.getAttributeNode("caseListFile").nodeValue
 				_, configVersion = getConfigVersion(report, caseListFile.split('-')[0])
-				if configVersion <= typeVersion:
-					testConfigs.append(config)
+				# Single test cases configs must be added only when API version matches to follow the same logic as in CTS runner
+				if 'single' in caseListFile:
+					if configVersion == typeVersion:
+						testConfigs.append(config)
+				else:
+					if configVersion <= typeVersion:
+						testConfigs.append(config)
 		else:
 			# For GL check for the configs which must be tested (largest version less than "type")
 			for config in configs:
