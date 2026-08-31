@@ -133,8 +133,8 @@ def getPackageDescription (report, verification):
 								m = reobj.match(log)
 								index = int(m.group(1))
 								count = int(m.group(2))
-								if index != (cmdArgs.deqp_fraction[0] + 1) and count != cmdArgs.deqp_fraction[1]:
-									raise Exception("fractional args %d,%d doesn't match test log name" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1]))
+								if index != (cmdArgs.deqp_fraction[0] + 1) or count != cmdArgs.deqp_fraction[1]:
+									raise Exception("fractional args %d,%d doesn't match test log name %d-of-%d" % (cmdArgs.deqp_fraction[0], cmdArgs.deqp_fraction[1], index, count))
 						except Exception as e:
 							report.failure("Failure when parsing command line arguments \"%s\": %s" % (args, str(e)), log)
 						break
