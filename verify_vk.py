@@ -55,6 +55,16 @@ def getMustpassName(api):
 
 	return None
 
+def getFractionMustpassName(api):
+	assert api == 'VK' or api == 'VKSC'
+
+	if api == "VK":
+		return "vk-fraction-mandatory-tests.txt"
+	elif api == "VKSC":
+		return "vksc-fraction-mandatory-tests.txt"
+
+	return None
+
 def getMustpass (report, api, ctsPath, releaseTagStr):
 	report.message("Fetching mustpass for %s." % releaseTagStr)
 	pushWorkingDir(ctsPath)
@@ -65,7 +75,8 @@ def getMustpass (report, api, ctsPath, releaseTagStr):
 	mustpassPath	= os.path.join(mustpassBaseDir, mustpassDir, mustpassName)
 	mustpass	= Mustpass(mustpassPath)
 
-	fractionMustpassPath	= os.path.join(mustpassBaseDir, mustpassDir, 'vk-fraction-mandatory-tests.txt')
+	fractionMustpassName	= getFractionMustpassName(api)
+	fractionMustpassPath	= os.path.join(mustpassBaseDir, mustpassDir, fractionMustpassName)
 	fractionMustpass = None
 	if os.path.isfile(fractionMustpassPath):
 		fractionMustpass = Mustpass(fractionMustpassPath)
