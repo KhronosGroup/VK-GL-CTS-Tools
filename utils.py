@@ -319,6 +319,7 @@ def checkoutReleaseTag(report, releaseTag):
 
 def applyPatch(report, patch):
 	success = False
+	normalizePatchLineEndings(patch)
 	try:
 		git('apply', '--whitespace=nowarn', patch)
 	except:
@@ -326,6 +327,19 @@ def applyPatch(report, patch):
 	else:
 		success = True
 	return success
+
+def normalizePatchLineEndings(patch):
+	# Some submitters generate their .patch files on Windows with
+	# core.autocrlf enabled, which leaves every line CRLF-terminated.
+	# `git apply` matches context lines byte-for-byte, so a CRLF patch
+	# fails against the (LF-only) CTS tree even though the underlying
+	# diff is valid. Normalize to LF before handing it to git apply.
+	with open(patch, 'rb') as f:
+		data = f.read()
+	normalized = data.replace(b'\r\n', b'\n')
+	if normalized != data:
+		with open(patch, 'wb') as f:
+			f.write(normalized)
 
 def readTestLog (report, filename):
 	parser = BatchResultParser(report)
