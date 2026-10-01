@@ -25,6 +25,16 @@ python3 verify_submission.py your_package.tgz -o output.md -v -k
 
 Please use `--help` option for more detailed information and other options. If you want to verify a package that wasn't downloaded from the Khronos website, please ensure that you don't use `-k` option.
 
+== Tests
+
+Unit tests live in `tests/` and use only the Python standard library. Run them from the repository root:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+GitHub Actions runs them on every push and pull request.
+
 License
 -------
 
