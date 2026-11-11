@@ -78,6 +78,7 @@ def getPackageDescription (report, verification):
 	conformProduct	= []
 	conformCpu		= None
 	testLogsFraction= {}
+	referencedItems	= []
 
 	reobj = re.compile(FRACTION_REGEX)
 	isFraction = False
@@ -125,8 +126,11 @@ def getPackageDescription (report, verification):
 						try:
 							cmdArgs = parseCmds(verification.cmdParser, args)
 							if verification.api == "VKSC" and cmdArgs.deqp_subprocess_cfg_file != None:
+								# Every fraction of a submission may reference the same cfg file,
+								# so only mark it as used here; it is removed from the list of
+								# unknown items once all test logs have been checked.
 								if cmdArgs.deqp_subprocess_cfg_file.name in otherItems:
-									otherItems.remove(cmdArgs.deqp_subprocess_cfg_file.name)
+									referencedItems.append(cmdArgs.deqp_subprocess_cfg_file.name)
 								else:
 									raise Exception("subprocess cfg file specified but is not present in submission package")
 							if isFraction:
@@ -140,6 +144,8 @@ def getPackageDescription (report, verification):
 						break
 				if not foundParams:
 					report.failure("Could not find commandLineParameters", log)
+
+	otherItems = [item for item in otherItems if item not in referencedItems]
 
 	for key, filesList in testLogsFraction.items():
 		filesList.sort()
